@@ -78,53 +78,10 @@
 
 ## events.json(正本フォーマット)
 
-```jsonc
-{
-  "events": [
-    {
-      "id": "cave_encounter",      // シーン上のトリガーとこの id を対応させる
-      "conditions": [              // すべて満たすと発火(AND)
-        { "type": "progress", "value": 5 },           // 進行度 >= 5
-        { "type": "hasItem",  "itemKey": "old_key" }
-      ],
-      "startBgm": "bgm_tense",     // 任意(省略可)
-      "steps": [
-        { "kind": "line",     "speaker": "キツネ", "portrait": "fox_smile",   "text": "やあ、よく来たね。" },
-        { "kind": "battle",   "enemyKey": "wolf_boss" },
-        { "kind": "line",     "speaker": "キツネ", "portrait": "fox_smile",   "text": "見事だ。これを持っていけ。" },
-        { "kind": "giveItem", "itemKey": "old_key" },
-        { "kind": "choice", "flag": "fox_choice", "options": [   // 選んだ値を flags["fox_choice"] に書く
-            { "text": "一緒に行く",   "value": "together" },
-            { "text": "ひとりで行く", "value": "alone" }
-        ]},
-        { "kind": "line",     "speaker": "キツネ", "portrait": "fox_smile",   "text": "…そうか。" }
-      ],
-      "nextProgress": 6            // 終了時に進める進行度(任意。省略時は進めない)
-    },
-    {
-      "id": "fox_reunion",
-      "conditions": [
-        { "type": "progress", "value": 8 },
-        { "type": "flag", "key": "fox_choice", "value": "together" }   // 「一緒に行く」を選んだ人だけ発火
-      ],
-      "steps": [
-        { "kind": "line", "speaker": "キツネ", "portrait": "fox_smile", "text": "ここまで一緒に来られたな。" }
-      ]
-    }
-  ]
-}
-```
-
-**Importer の検証(違反は取り込みエラー)**:
-
-- `steps` の先頭・末尾は必ず `line`(`battle` / `giveItem` / `choice` は単独・末尾にならない)
-- `portrait` / `enemyKey` / `itemKey` / `startBgm` はカタログに存在するキーのみ
-- `conditions[].type` は `progress` / `hasItem` / `flag` のみ
-
-> 進行度の比較は `>=`(以上)。
+物語班が手書きする `events.json` の正本フォーマット・Importer の検証ルール・登場人物の立ち絵(`portrait`)キーのカタログは `CharactersAndEvents.md` にまとめる。
 
 ---
 
 ## Importer
 
-`events.json` を取り込む Importer はエディタ拡張として `Features/Scenario/` 配下に実装する。検証内容は上記のとおり。
+`events.json` を取り込む Importer はエディタ拡張として `Features/Scenario/` 配下に実装する。検証内容は `CharactersAndEvents.md` を参照。
