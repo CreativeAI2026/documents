@@ -8,7 +8,7 @@
 ## 登場人物と立ち絵
 
 各キャラに用意する表情と、`line` ステップの `portrait` に書くキーの一覧。
-キーは `{キャラ}_{表情}` の snake_case。実体(PNG)は絵班が用意し、システム班がキーとして登録する(`StoryProgressionSystem.md` のカタログ参照)。
+キーは `{キャラ}_{表情}` の snake_case。実体(PNG)は視覚班が用意し、システム班がキーとして登録する(`StoryProgressionSystem.md` のカタログ参照)。
 
 ### 主人公 — `hero`
 
