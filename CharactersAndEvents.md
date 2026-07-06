@@ -57,8 +57,7 @@
     {
       "id": "cave_encounter",      // シーン上のトリガーとこの id を対応させる
       "conditions": [              // すべて満たすと発火(AND)
-        { "type": "progress", "value": 5 },           // 進行度 >= 5
-        { "type": "hasItem",  "itemKey": "old_key" }
+        { "type": "progress", "value": 5 }             // 進行度 >= 5
       ],
       "startBgm": "bgm_tense",     // 任意(省略可)
       "steps": [
@@ -66,7 +65,7 @@
         { "kind": "line",     "speaker": "はかなげ少女", "portrait": "girl_fear",      "text": "来ないで……っ" },
         { "kind": "battle",   "enemyKey": "wolf_boss" },
         { "kind": "line",     "speaker": "はかなげ少女", "portrait": "girl_resolve",   "text": "……ありがとう。これを持っていって。" },
-        { "kind": "giveItem", "itemKey": "old_key" },
+        { "kind": "giveItem", "itemKey": "old_key" },   // 大事なもの(キーアイテム)を渡す。所持判定には使わない
         { "kind": "choice", "flag": "girl_choice", "options": [   // 選んだ値を flags["girl_choice"] に書く
             { "text": "一緒に行く",   "value": "together" },
             { "text": "ひとりで行く", "value": "alone" }
@@ -94,7 +93,7 @@
 | フィールド | 必須 | 内容 |
 | ---------- | ---- | ---- |
 | `id` | ○ | イベント識別子。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない) |
-| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。`progress` / `hasItem` / `flag` のみ |
+| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。`progress` / `flag` のみ |
 | `startBgm` | | イベント開始時の BGM キー。省略可 |
 | `steps[]` | ○ | 会話ステップの並び。`line` / `battle` / `giveItem` / `choice` |
 | `nextProgress` | | 終了時に進める進行度。省略時は進めない |
@@ -107,6 +106,6 @@
 
 - `steps` の先頭・末尾は必ず `line`(`battle` / `giveItem` / `choice` は単独・末尾にならない)
 - `portrait` / `enemyKey` / `itemKey` / `startBgm` はカタログに存在するキーのみ
-- `conditions[].type` は `progress` / `hasItem` / `flag` のみ
+- `conditions[].type` は `progress` / `flag` のみ
 
 > 進行度の比較は `>=`(以上)。
