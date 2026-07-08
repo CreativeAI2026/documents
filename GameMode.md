@@ -2,27 +2,24 @@
 
 移動シーン上で **戦闘を別シーンに分けず「モード」で切り替える**ための仕組み。現在のモードを表す状態を1つだけ持ち(Single Source of Truth)、各システムはそれを見て自分の挙動を変える・自制する。
 
-- **形式** … 現在モードを表す enum 1つ(`Field` / `Battle`)。同一の移動シーン内で切り替わるだけで **シーン遷移しない**([GameSystems.md](./GameSystems.md) §5)
-- **思想** … 中央(`GameModeManager`)は **状態を持つだけ**。「戦闘中か?」を各所でバラバラに判定せず、1か所に集約して各システムが問い合わせる
-- このドキュメントが **モードの正本**。セーブ/進行/シーンUI 側は概要と参照のみ
-
 ---
 
 ## 1. モードと遷移
 
-```
-GameMode { Field, Battle }   ← 移動シーンの中で切り替わる(シーン遷移なし)
+`GameMode { Field, Battle }` は移動シーンの中で切り替わる(**シーン遷移しない**)。
 
-[Field]  通常の探索・移動。移動HUD表示
-   │  会話の battle ステップに到達(StoryProgressionSystem.md)
-   ▼  EnterBattle()
-[Battle] 戦闘モード。戦闘HUDに置き換え。移動・トリガー等を抑止
-   │  決着(勝利→会話の続きへ / 敗北→直近セーブから再開)
-   ▼  ExitBattle()
-[Field]  会話の続き・探索に戻る
+```mermaid
+flowchart TD
+    field["Field<br/>通常の探索・移動(移動HUD)"]
+    battle["Battle<br/>戦闘モード(戦闘HUDに置換・移動/トリガー等を抑止)"]
+    field -->|"会話の battle ステップに到達<br/>(StoryProgressionSystem.md)→ EnterBattle()"| battle
+    battle -->|"勝利 → 会話の続きへ / ExitBattle()"| field
+    battle -->|"敗北 → 直近セーブから再開<br/>(SaveSystem.md)"| field
+
+    linkStyle default stroke-width:1px
 ```
 
-- 戦闘は **会話(イベント)の途中**でのみ発生する(`StoryProgressionSystem.md`:戦闘は単独・末尾にならない)。`battle` ステップ到達で `EnterBattle()`、決着で `ExitBattle()`
+- 戦闘は **会話(イベント)の途中**でのみ発生する(`StoryProgressionSystem.md`:戦闘は単独・末尾にならない)
 - 戦闘は **勝敗を記録しない**。状態は進行度で判定する(`StoryProgressionSystem.md`)
 - HUDの置き換え(移動HUD ⇔ 戦闘HUD)はモード変化に同期する([UISystem.md](./UISystem.md) §1)
 
@@ -43,8 +40,6 @@ GameMode { Field, Battle }   ← 移動シーンの中で切り替わる(シー�
 | 調合UI | ○(調合場所でのみ) | ×(戦闘中は調合場所で発生しない想定) | [UISystem.md](./UISystem.md) §1 |
 | インベントリUI / キャラクターUI | ○ | **×** | 戦闘中は装備変更・ステータス確認・戦闘食材セットを開かせない |
 
-★印の **トリガー多重発火の抑止** はシステム班(`EventTrigger`)の責務。戦闘中はモードを見て新規発火を止める。
-
 ---
 
 ## 3. 実装(GameModeManager)
@@ -58,3 +53,34 @@ GameMode { Field, Battle }   ← 移動シーンの中で切り替わる(シー�
   - インベントリUI(食材タブ含む): `Battle` 中は開かせない。代わりに戦闘食材UI(セット済み最大3つ)を表示する
 
 > 中央は「状態を持つだけ」。各システムが状態を見て自制することで、戦闘・移動の実装と疎結合のまま境界を切れる。
+
+---
+
+## 4. 関数レベルのフロー
+
+「モードを持つだけ」を呼び出し関係に落としたもの。**状態を変える人（進行側）と、変化に追従する人（UI・EventTrigger 等）を分ける**のが要点。中央 `GameModeManager` は前者の書き込みを受け、後者へ通知するだけ。
+
+- `EnterBattle()` / `ExitBattle()` … **叩くのは進行側だけ**（会話の `battle` ステップ到達で Enter、決着で Exit → [StoryProgressionSystem.md](./StoryProgressionSystem.md)）。戦闘・UI・調合は呼ばない。
+- `CurrentMode` / `OnModeChanged` … 各システムが**読む/購読する**側。自分が今動いてよいかを自制する（§2）。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EP as 進行側(EventPlayer)
+    participant GMM as GameModeManager
+    participant UI as UI(HUD)
+    participant ET as EventTrigger
+    participant BT as 戦闘システム
+
+    Note over UI,ET: 起動時に OnModeChanged を購読
+    EP->>GMM: EnterBattle()
+    GMM-->>UI: OnModeChanged(Battle)
+    GMM-->>ET: OnModeChanged(Battle)
+    Note over UI: 移動HUD→戦闘HUDに差し替え
+    Note over ET: Battle中は新規発火を止める
+    BT->>GMM: CurrentMode を読む(自制)
+    Note over EP,BT: 決着
+    EP->>GMM: ExitBattle()
+    GMM-->>UI: OnModeChanged(Field)
+    GMM-->>ET: OnModeChanged(Field)
+```
