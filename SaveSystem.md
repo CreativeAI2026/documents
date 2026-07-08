@@ -31,7 +31,7 @@
 
 ### 1.2 アイテムの表現(個体 = ロール済みステータス込み)
 
-調合で生成される装備品・食材は **同じレシピでも個体ごとにステータスが違う**(ディリクレでロール → `CraftingStatAlgorithm.md`)。素材のマスタは同梱データが持つが、**調合結果のマスタ(名前・説明・画像・カテゴリ)は調合時に CDN から取得してローカルにキャッシュ**する。**ロール済みステータスはセーブ側で個体ごとに保存**する(結果マスタ・画像の持ち方は `CraftingArchitecture.md`)。
+調合で生成される**装備品**は **同じレシピでも個体ごとにステータスが違う**(ディリクレでロール → `CraftingStatAlgorithm.md`)。**食材**はHP即時回復のみの固定ルールで個体差が無い。素材・調合結果のマスタ(名前・説明・画像・カテゴリ)は**すべて同梱データが持つ**(CDN無し → `CraftingArchitecture.md`)。**装備品のロール済みステータスはセーブ側で個体ごとに保存**する(食材はステータスを持たないので保存不要)。
 
 ```
 inventory: [
@@ -44,9 +44,9 @@ inventory: [
 ]
 ```
 
-- ロール済みステータスを持つ個体(装備品・食材)は一意。`count = 1` で1件ずつ持つ(個体差が消えてはいけない)
-- ステータスを持たない素朴なアイテム(拾得素材など)は `rolledStats` を空にして `count` でまとめてよい
-- マスタが持つ情報は保存せず、`itemId` から都度引く(素材は同梱DB、調合結果は CDN 取得のローカルキャッシュ → `CraftingArchitecture.md`)。重複・不整合を避ける
+- ロール済みステータスを持つ個体(**装備品**)は一意。`count = 1` で1件ずつ持つ(個体差が消えてはいけない)
+- ステータスを持たない素朴なアイテム(食材・拾得素材など)は `rolledStats` を空にして `count` でまとめてよい
+- マスタが持つ情報は保存せず、`itemId` から都度引く(素材・調合結果とも**同梱データ** → `CraftingArchitecture.md`。CDN無し)。重複・不整合を避ける
 
 ```
 equipped: {
@@ -124,3 +124,32 @@ equipped: {
 ```
 
 > 装備 → 最大HP確定 → 現在HP反映 の順にしないと現在HPを最大HPでクランプできない。これがインベントリ→装備→HP の依存理由。
+
+---
+
+## 7. 関数レベルのフロー（誰が叩き、誰が待ち受けるか）
+
+**`SaveService` が唯一の入口**。持ち主（`ProgressManager` / `PlayerStats` / `Inventory` / プレイヤー）は自分の状態を渡す/受け取るだけ。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as セーブUI(はい)
+    participant SV as SaveService
+    participant PM as ProgressManager
+    participant PS as PlayerStats
+    participant INV as Inventory
+    participant DISK as ディスク(save.json)
+
+    UI->>SV: Save()
+    SV->>PM: CaptureState() → progress/flags
+    SV->>PS: 現在HP・装備セットを読む
+    SV->>INV: 所持品(個体+rolledStats)を読む
+    SV->>DISK: アトミック書き込み(全書き)
+
+    Note over SV: 起動「続きから」/ 死亡リスポーン
+    SV->>DISK: 全読み
+    SV->>INV: inventory を復元
+    SV->>PS: equipped を復元 → 最大HP確定 → currentHp をクランプ
+    SV->>PM: RestoreState(progress/flags)
+```
