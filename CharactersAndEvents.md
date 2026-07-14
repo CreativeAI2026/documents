@@ -1,14 +1,13 @@
 # 登場人物・立ち絵と events.json フォーマット
 
-物語班が手書きする `events.json` の **正本フォーマット** と、`portrait`(立ち絵)に書くキーの **カタログ** を定める。
-システム全体での位置づけ・進行度・条件・会話ステップの考え方は `StoryProgressionSystem.md` を参照。
+物語班が手書きする `events.json` の **フォーマット** と、`portrait`(立ち絵)に書くキーの **カタログ** を定める。
 
 ---
 
 ## 登場人物と立ち絵
 
 各キャラに用意する表情と、`line` ステップの `portrait` に書くキーの一覧。
-キーは `{キャラ}_{表情}` の snake_case。実体(PNG)は視覚班が用意し、システム班がキーとして登録する(`StoryProgressionSystem.md` のカタログ参照)。
+キーは `{キャラ}_{表情}` の snake_case。
 
 ### 主人公 — `hero`
 
@@ -43,9 +42,6 @@
 | # | 表情 | portrait キー |
 | - | ---- | ------------- |
 | 1 | 通常顔 | `gramophone_normal` |
-
-> ロボットはキャラ自体が未確定。表情が追加され次第ここに追記する。
-> `speaker`(表示名)は表中のキャラ名に準拠。正式名称が決まったら差し替える。
 
 ---
 
@@ -98,14 +94,6 @@
 | `steps[]` | ○ | 会話ステップの並び。`line` / `battle` / `giveItem` / `choice` |
 | `nextProgress` | | 終了時に進める進行度。省略時は進めない |
 
-ステップ・条件の各タイプの意味は `StoryProgressionSystem.md` の表を参照。
+> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。勝つと同じ会話の続きから再生、負けると直近セーブから再開する(勝敗は記録せず、状態は進行度で判定 → [Specification.md](./Specification.md) の進行管理)。
 
 ---
-
-## Importer の検証(違反は取り込みエラー)
-
-- `steps` の先頭・末尾は必ず `line`(`battle` / `giveItem` / `choice` は単独・末尾にならない)
-- `portrait` / `enemyKey` / `itemKey` / `startBgm` はカタログに存在するキーのみ
-- `conditions[].type` は `progress` / `flag` のみ
-
-> 進行度の比較は `>=`(以上)。
