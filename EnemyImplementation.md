@@ -1,39 +1,54 @@
-# 敵の実装(手順)
+# 敵の実装(手順とフロー)
 
-敵の **仕様**(雑魚なし・中ボス以上のみ・1戦闘につき1体 等)は [Specification.md](./Specification.md)「プロジェクト前提」。ここでは敵を Unity 上でどう作り、`events.json` の `battle` ステップに書く `enemyKey`(→ [CharactersAndEvents.md](./CharactersAndEvents.md))とどう繋ぐかをまとめる。
+敵を Unity 上でどう作り、`events.json` の `battle` ステップに書く `enemyKey`(→ [CharactersAndEvents.md](./CharactersAndEvents.md))とどう繋ぐか。敵の **仕様**(雑魚なし・中ボス以上のみ・1戦闘につき1体 等)は [Specification.md](./Specification.md)「プロジェクト前提」。
 
 ---
 
-## enemyKey → EnemyData → Prefab の2段解決
+## 1. 敵を作って登録する(Unity Editor でやること)
 
-物語班が書くのは **キー文字列だけ**(例 `{ "kind": "battle", "enemyKey": "wolf_boss" }`)。立ち絵や BGM は「キー → 1ファイル」の1段だが、**敵は1ファイルではない**ので2段になる。
+物語班が書くのは **キー文字列だけ**(例 `{ "kind": "battle", "enemyKey": "wolf_boss" }`)。それを敵 Prefab に結びつけるのがこの節の作業。**`EnemyDB` 1枚に「`enemyKey` → Prefab」の行を並べるだけ**。
 
-| 段 | 何 | 中身 |
-|---|---|---|
-| 1段目 | `enemyKey` → **`EnemyData`**(ScriptableObject) | ステータス + 敵 Prefab への参照 |
-| 2段目 | `EnemyData` → **Prefab** | 3Dモデル(`.fbx`) + マテリアル + アニメ + コンポーネントを合成したもの |
+**① 敵 Prefab を作る**
+- モデル(`.fbx`)+ マテリアル + アニメ + 挙動 + **`EnemyStatus`** を1つの Prefab に合成し、Project に置く
+- **ステータス・見た目・挙動はすべて Prefab 側が持つ**(`EnemyStatus` が `EnemyParameterData` を参照)。`EnemyDB` にはキーと Prefab しか持たせない
 
-敵は「モデル + マテリアル + アニメ + 挙動」を **Prefab に合成**し、`EnemyData` がその **Prefab への参照とステータス**を持つ。だから `enemyKey → EnemyData → Prefab` の2段解決になる。
+**② `EnemyDB` に登録する**
+- `EnemyDB` アセットは **`Assets/Resources/EnemyDB.asset` に作成済み**(空)。実行時に `enemyKey → Prefab` を引くための唯一のアセット。
+- `EnemyDB` を選択 → Inspector のリストの **「＋」で行を1つ足す**。その行に:
+  - **`Enemy Key`**:`wolf_boss` などを**キーボードで入力**
+  - **`Prefab`**:①の Prefab を欄に **ドラッグ&ドロップ**
+- ドラッグした Prefab は GUID で保持されるので、あとでリネーム・移動しても参照は切れない
 
-## 手順
+**③ `enemyKey` を物語班へ共有**
+- `EnemyDB` に並べた `enemyKey` 一覧を渡す(手書きの打ち間違い対策)。物語班は `events.json` の `battle` ステップに書くだけ → Import 時に照合される(**存在しない `enemyKey` は Importer が弾く**)
 
-| 手順 | 担当 | やること |
-|---|---|---|
-| 1 | 視覚班 | 敵の 3Dモデル・マテリアル・アニメ・コンポーネントを **Prefab に合成** |
-| 2 | システム班 | **`EnemyData`(ScriptableObject)** を作り、ステータス + 手順1の Prefab 参照を設定。`id` を `enemyKey` にする |
-| 3 | システム班 | `enemyKey` の有効一覧を物語班へ共有(手書きの打ち間違い対策) |
-| 4 | 物語班 | `events.json` の `battle` ステップに `enemyKey` を**書くだけ** |
+### 確認(Play)
+- `battle` ステップのあるイベントを踏む → その敵が **1体**出る
+- 倒すとイベント(会話)が **続く**
+- 未作成の `enemyKey` でも **クラッシュせず警告スキップ**(会話は続行)
 
-- **Prefab 参照は Inspector にドラッグ**(実体は GUID なのでリネーム・移動しても切れない。`PlayerRig` を差すのと同じ原理 → [PlayerImplementation.md](./PlayerImplementation.md))。
-- **専用カタログは新設しない**。`EnemyData` を規約フォルダに置き `id`(= `enemyKey`)で引く運用にする。存在しないキーは Importer が弾く(→ [EventImplementation.md](./EventImplementation.md))。
+---
 
-## 実行時
+## 2. 関数レベルのフロー(BattleRunner)
 
-`EventPlayer` が `battle` ステップに来たら、`enemyKey` で `EnemyData` を引き、その Prefab を出して戦闘を開始する:
+`enemyKey` を受け取り **敵を出す → 撃破まで待つ → イベントに制御を返す** のが `BattleRunner`(`IBattleRunner` 実体。`_Project/Features/Enemy/Scripts/BattleRunner.cs`)。
 
-```csharp
-if (enemyCatalog.TryGet("wolf_boss", out var data))   // 1段目: key → EnemyData
-    var enemy = Instantiate(data.prefab);             // 2段目: EnemyData → Prefab
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EP as EventPlayer(battle ステップ)
+    participant GM as GameModeManager
+    participant BR as BattleRunner
+    participant DB as EnemyDB
+    participant EN as 敵インスタンス(EnemyStatus)
+
+    EP->>GM: EnterBattle()
+    EP->>BR: Run(enemyKey)
+    BR->>DB: TryGet(enemyKey) → Prefab
+    BR->>EN: Instantiate(Prefab)
+    Note over BR,EN: EnemyStatus.OnDeathTriggered を購読
+    EN-->>BR: OnDeathTriggered(撃破)
+    BR-->>EP: Run 完了(復帰)
+    EP->>GM: ExitBattle()
+    Note over EP: 会話の続きへ
 ```
-
-戦闘モード(Field/Battle)の入り方・決着後の会話継続は [Specification.md](./Specification.md)「常駐アーキテクチャ」の `GameModeManager` と、再生フロー([EventImplementation.md](./EventImplementation.md))を参照。
