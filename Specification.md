@@ -87,7 +87,7 @@
                     ↑装備変更で更新
 ```
 
-> 最終値を保持・公開する `PlayerStats` の実装とリグ常駐・単一化は [PlayerImplementation.md](./PlayerImplementation.md)。
+> 最終値を保持・公開する `PlayerStatus` の実装とリグ常駐・単一化は [PlayerImplementation.md](./PlayerImplementation.md)。
 
 ---
 
@@ -133,7 +133,7 @@
 
 - **`ProgressManager`**(常駐)… 進行度・フラグを**保持**し、条件判定に読ませる。状態を持つだけで、イベントの中身は知らない
 - **`EventTrigger`**(非常駐)… シーン上のトリガーに置く。プレイヤー侵入を検知し、条件を満たしたら**イベントの発火を決める**(ルーター役)
-- **`EventPlayer`**(非常駐)… `EventTrigger` に発火を託され、**1本の会話イベントを頭から順に再生し切る指揮役**。`line`→会話UI、`choice`→フラグ書込、`battle`→戦闘モード、終了時→進行度更新 と、各ステップで他システムを叩く。`EnterBattle()`/`AdvanceTo()` を叩く「**進行側**」とはこの `EventPlayer` を指す
+- **`EventPlayer`**(常駐)… `EventTrigger` に発火を託され、**1本の会話イベントを頭から順に再生し切る指揮役**。`line`→会話UI、`choice`→フラグ書込、`battle`→戦闘モード、終了時→進行度更新 と、各ステップで他システムを叩く。`EnterBattle()`/`AdvanceTo()` を叩く「**進行側**」とはこの `EventPlayer` を指す。Title で常駐生成され `EventPlayerService.Current` に登録するため、非常駐の `EventTrigger` は per-field 配線せず seam 経由で発火を託せる
 
 ---
 
@@ -203,8 +203,11 @@ UIの出方は2種類:
 | ロードオーバーレイ(常駐 Canvas) | シーン遷移中のロード表示。全ロードを覆う土台 |
 | `ProgressManager` | メイン進行度・フラグの保持 |
 | `GameModeManager` | Field / Battle 状態の保持・変化通知 |
-| プレイヤーリグ(実体 + `PlayerStats` + メインカメラ) | モデル・現在HP・装備の補正・追従カメラを保持。エリア遷移をまたいで持ち越す(カメラを各シーンに置くとアンロードで消えるため含める) |
+| プレイヤーリグ(実体 + `PlayerStatus` + メインカメラ) | モデル・現在HP・装備の補正・追従カメラを保持。エリア遷移をまたいで持ち越す(カメラを各シーンに置くとアンロードで消えるため含める) |
 | `Inventory`(所持品) | 所持アイテムの実行時保持(個体＋ロール済みステータス)。装備(`equipped`)はここの個体を参照。ディスクへは**手動セーブ時のみ**全書き。プレイヤーリグには載せない |
+| `EventPlayer`(会話イベント指揮役) | 会話イベントを頭から再生し切る指揮役。状態は持たず**保存されない**。Title で常駐生成し `EventPlayerService.Current` に登録するので、非常駐の `EventTrigger` は seam 経由で発火を託す(per-field 配線が不要)。実装は [EventImplementation.md](./EventImplementation.md) |
+
+> **`BattleRunner`(戦闘実行)は常駐にしない**。状態を持たず、コルーチンも `EventPlayer` 側が回すため MonoBehaviour ではなく plain class。Title で1つ生成して `BattleRunnerService.Current`(static seam)に登録するだけで、シーンをまたいでも常に呼べる。実装は [EnemyImplementation.md](./EnemyImplementation.md)。
 
 ```mermaid
 flowchart TB
@@ -218,6 +221,7 @@ flowchart TB
         PS["プレイヤーリグ + PlayerStats"]
         INV["Inventory"]
         GMM["GameModeManager<br/>(保存されない)"]
+        EP["EventPlayer<br/>(保存されない)"]
     end
 
     subgraph scene["非常駐(フィールドシーンと共に生死)"]
@@ -229,6 +233,7 @@ flowchart TB
 
     ET -->|"参照(進行度・フラグ)"| PM
     ET -->|"参照(モード:Battle中は発火しない)"| GMM
+    ET -->|"発火を託す(EventPlayerService seam)"| EP
     PM ==>|保存| disk
     PS ==>|"保存(現在HP・装備・座標)"| disk
     INV ==>|"保存(所持品)"| disk
@@ -236,7 +241,7 @@ flowchart TB
 
 ### 6.1 生成と破棄(方針)
 
-- 生成はすべて **タイトルシーンが担う**。アプリ常駐はタイトル起動時に1回だけ、セッション常駐(`ProgressManager` / `GameModeManager` / プレイヤーリグ / `Inventory`)は「はじめる／続きから」で新規生成。
+- 生成はすべて **タイトルシーンが担う**。アプリ常駐はタイトル起動時に1回だけ、セッション常駐(`ProgressManager` / `GameModeManager` / `EventPlayer` / プレイヤーリグ / `Inventory`)は「はじめる／続きから」で新規生成(戦闘実行の `BattleRunner` は常駐ではなく plain class を生成して `BattleRunnerService` に登録)。
 - **生成順はマネージャ → プレイヤー**(プレイヤーが `GameModeManager` を購読するため)。
 - **「タイトルに戻る」でセッション常駐だけ破棄**し、次の開始で作り直す(アプリ常駐は残す)。
 - 二重生成ガード・`EnsureLoadOverlay`・プレイヤーリグの生成コードなど具体は [PlayerImplementation.md](./PlayerImplementation.md)。
