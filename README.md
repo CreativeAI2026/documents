@@ -31,8 +31,8 @@
 
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
-| [`PlayerImplementation.md`](./PlayerImplementation.md) | **プレイヤー実装**。リグ生成・常駐・単一化の手順 + `PlayerStats` のフロー図 |
-| [`EnemyImplementation.md`](./EnemyImplementation.md) | **敵実装**。`enemyKey → EnemyData → Prefab` の2段解決と登録手順 |
+| [`PlayerImplementation.md`](./PlayerImplementation.md) | **プレイヤー実装**。リグ生成・常駐・単一化の手順 + Title からの生成フロー + `PlayerStatus` のフロー図 |
+| [`EnemyImplementation.md`](./EnemyImplementation.md) | **敵実装**。`enemyKey → Prefab`(`EnemyDB`)の対応表と登録手順 |
 | [`EventImplementation.md`](./EventImplementation.md) | **イベント発火の実装**。取り込み〜トリガー設置〜再生の手順 + 呼び出しフロー図 |
 | [`UIImplementation.md`](./UIImplementation.md) | **UI 実装**。Prefab/Canvas 構成・`UiRouter`(排他)・HUD の自動切替 |
 | [`CraftingArchitecture.md`](./CraftingArchitecture.md) | **調合アーキテクチャ**。カタログDB・画像/名前の事前生成・実行時フロー |
