@@ -53,13 +53,12 @@
     {
       "id": "cave_encounter",      // シーン上のトリガーとこの id を対応させる
       "conditions": [              // すべて満たすと発火(AND)
-        { "type": "progress", "value": 5 }             // 進行度 >= 5
+        { "type": "progress", "value": 5 }             // 進行度がちょうど 5 のとき発火(== 判定)
       ],
-      "startBgm": "bgm_tense",     // 任意(省略可)
       "steps": [
         { "kind": "line",     "speaker": "主人公",       "portrait": "hero_surprised", "text": "…誰だ?" },
         { "kind": "line",     "speaker": "はかなげ少女", "portrait": "girl_fear",      "text": "来ないで……っ" },
-        { "kind": "battle",   "enemyKey": "wolf_boss" },
+        { "kind": "battle" },                                    // 戦闘(敵はシーンのトリガーに配線。JSON に敵は書かない)
         { "kind": "line",     "speaker": "はかなげ少女", "portrait": "girl_resolve",   "text": "……ありがとう。これを持っていって。" },
         { "kind": "giveItem", "itemKey": "old_key" },   // 大事なもの(キーアイテム)を渡す。所持判定には使わない
         { "kind": "choice", "flag": "girl_choice", "options": [   // 選んだ値を flags["girl_choice"] に書く
@@ -68,7 +67,7 @@
         ]},
         { "kind": "line",     "speaker": "主人公", "portrait": "hero_normal", "text": "…そうか。" }
       ],
-      "nextProgress": 6            // 終了時に進める進行度(任意。省略時は進めない)
+      "nextProgress": 6            // 終了時に進行度を 6 へ。5 でなくなるので入り直しても二度と発火しない=1回きり
     },
     {
       "id": "girl_reunion",
@@ -78,7 +77,8 @@
       ],
       "steps": [
         { "kind": "line", "speaker": "はかなげ少女", "portrait": "girl_smile", "text": "ここまで一緒に来られたね。" }
-      ]
+      ],
+      "nextProgress": 9            // 必須。進行度を 9 へ進め、8 でなくなるので二度と発火しない
     }
   ]
 }
@@ -89,11 +89,10 @@
 | フィールド | 必須 | 内容 |
 | ---------- | ---- | ---- |
 | `id` | ○ | イベント識別子。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない) |
-| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。`progress` / `flag` のみ |
-| `startBgm` | | イベント開始時の BGM キー。省略可 |
+| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` は同じ進行度での分岐に任意で足す |
 | `steps[]` | ○ | 会話ステップの並び。`line` / `battle` / `giveItem` / `choice` |
-| `nextProgress` | | 終了時に進める進行度。省略時は進めない |
+| `nextProgress` | ○ | 終了時に進める進行度。**全イベント必須**で、`progress` の `value` **より大きく**する。イベントは進行度が `value` に一致したときだけ発火し、終了で進行度が進んで一致しなくなるので、**どのイベントもちょうど1回だけ発火する** |
 
-> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。勝つと同じ会話の続きから再生、負けると直近セーブから再開する(勝敗は記録せず、状態は進行度で判定 → [Specification.md](./Specification.md) の進行管理)。
+> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。
 
 ---
