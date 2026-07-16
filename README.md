@@ -24,16 +24,15 @@
 
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
-| [`Specification.md`](./Specification.md) | **仕様書の本体**。プロジェクト前提(確定事項)/ インベントリ・アイテム・装備 / 進行管理 / シーン / 常駐アーキテクチャ / プレイヤーステータス / UI・オーバーレイ |
+| [`Specification.md`](./Specification.md) | **仕様書の本体**。プロジェクト前提(確定事項)/ プレイヤーステータス / インベントリ・アイテム・装備 / シーン / 進行管理 / UI・オーバーレイ / 常駐アーキテクチャ |
 | [`CharactersAndEvents.md`](./CharactersAndEvents.md) | **`events.json` フォーマット** + 登場人物・立ち絵(`portrait`)キーのカタログ(物語班が手書きする書式) |
 
 ### 実装・アルゴリズム(How)
 
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
-| [`PlayerImplementation.md`](./PlayerImplementation.md) | **プレイヤー実装**。リグ生成・常駐・単一化の手順 + Title からの生成フロー + `PlayerStatus` のフロー図 |
-| [`EnemyImplementation.md`](./EnemyImplementation.md) | **敵実装**。`enemyKey → Prefab`(`EnemyDB`)の対応表と登録手順 |
-| [`EventImplementation.md`](./EventImplementation.md) | **イベント発火の実装**。取り込み〜トリガー設置〜再生の手順 + 呼び出しフロー図 |
-| [`UIImplementation.md`](./UIImplementation.md) | **UI 実装**。Prefab/Canvas 構成・`UiRouter`(排他)・HUD の自動切替 |
+| [`PlayerImplementation.md`](./PlayerImplementation.md) | **プレイヤー実装**。リグ生成・常駐・単一化の手順 + Title からの生成フロー |
+| [`EventImplementation.md`](./EventImplementation.md) | **イベント発火の実装**。取り込み〜トリガー設置〜再生の手順(`battle` の **敵の作成・配置・戦闘** を含む)+ 呼び出しフロー図 |
+| [`UIImplementation.md`](./UIImplementation.md) | **UI 実装**。Prefab/Canvas 構成・`UiRouter`(排他)・`HudIconBar` のモード連動(右上アイコンバーの出し入れ) |
 | [`CraftingArchitecture.md`](./CraftingArchitecture.md) | **調合アーキテクチャ**。カタログDB・画像/名前の事前生成・実行時フロー |
 | [`CraftingStatAlgorithm.md`](./CraftingStatAlgorithm.md) | **調合ステータス算出**。素材2つから結果ステータスを決める数理モデル |
