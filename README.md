@@ -16,7 +16,7 @@
 
 - **まず [`Specification.md`](./Specification.md)(仕様書)を必ず読む**。ゲーム全体の前提・仕様はここに集約されている。
 - そのうえで、**自分の役割に応じて**下記の実装・その他ドキュメントを必要なぶんだけ読む(例: プレイヤー担当 → `PlayerImplementation.md`、イベント担当 → `EventImplementation.md`)。
-- 物語班は [`CharactersAndEvents.md`](./CharactersAndEvents.md) のみを読めばよい。
+- 物語班は [`ScenarioReference.md`](./ScenarioReference.md) のみを読めばよい。
 
 ## ドキュメント一覧
 
@@ -25,7 +25,7 @@
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
 | [`Specification.md`](./Specification.md) | **仕様書の本体**。プロジェクト前提(確定事項)/ プレイヤーステータス / インベントリ・アイテム・装備 / シーン / 進行管理 / UI・オーバーレイ / 常駐アーキテクチャ |
-| [`CharactersAndEvents.md`](./CharactersAndEvents.md) | **`events.json` フォーマット** + 登場人物・立ち絵(`portrait`)キーのカタログ(物語班が手書きする書式) |
+| [`ScenarioReference.md`](./ScenarioReference.md) | **`events.json` フォーマット** + 立ち絵(`portrait`)・アイテム/武器(`itemKey`/`weaponKey`)キーのカタログ(物語班が手書きする書式) |
 
 ### 実装・アルゴリズム(How)
 
