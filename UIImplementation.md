@@ -15,7 +15,7 @@ UI の **仕様**(どんな UI がいつ出るか・呼び出しの設計)は [S
 - **Title シーンで**生成器が組む `UIRoot` は各 UI が **空 Canvas の骨組み**(HUD の HP・即時食材使用UI・武器切替UI・会話UI)。班ごとの実 UI(Prefab/中身)を該当 Canvas に入れる。参照張りは **ドラッグ&ドロップ**。
 
 ### 確認(Play)
-- Title →「新規開始」→ **HUD**・**即時食材使用UI**・**武器切替UI** が出て、右上アイコンバーが表示される
+- Title →「新規開始」→ **HUD**・**即時食材使用UI** が出て、右上アイコンバーが表示される(**武器切替UIは武器0本なので非表示**。イベントで最初の1本を入手すると出る)
 - 右上アイコンから キャラ / インベ / セーブ を開くと **常に1つだけ**開く(別のを開くと前のが閉じる=排他)
 - 戦闘モードに入ると **右上アイコンバーだけが消える**(セーブ等を開けない)。HUD本体・即時食材使用UI は表示内容そのままで残る
 - 戦闘モードを抜けると **右上アイコンバーが戻る**
@@ -33,6 +33,8 @@ sequenceDiagram
     participant IB as HudIconBar(右上ナビ)
     participant UR as UiRouter
     participant GMM as GameModeManager
+    participant WM as WeaponManager(プレイヤーリグ)
+    participant WSW as 武器切替UI
     participant UI as 各UI(Prefab)
 
     Note over P,UI: 操作で開くUI(キャラ / インベ / セーブ / 調合)。instance はロード時に1度だけ生成し隠しておく
@@ -45,4 +47,8 @@ sequenceDiagram
     Note over GMM,UI: HP の HUD・即時食材使用UIは常駐(モードで変えない)
     GMM-->>IB: OnModeChanged(Field / Battle)
     IB->>IB: 自分の Canvas を SetActive(Field=true / Battle=false)
+
+    Note over WM,WSW: 武器切替UIはモードでなく所持本数で出し分ける
+    WM-->>WSW: OnWeaponsChanged(所持本数)
+    WSW->>WSW: 自分の Canvas を SetActive(0本=false / 1本以上=true)
 ```
