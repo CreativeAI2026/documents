@@ -10,7 +10,7 @@
 - **モデル + コントローラ + アニメーション + `PlayerStatus` + メインカメラ** を1つの Prefab にまとめ、Project に置く(**どのフィールドシーンにも置かない**)
 - ルートの **Tag を `Player`** にする(`EventTrigger` が侵入判定にこのタグを使う → [EventImplementation.md](./EventImplementation.md))
 - **Collider + Rigidbody** を付ける(`OnTriggerEnter` が飛ぶ前提)
-- **武器3本のモデルと `WeaponManager` も同じ Prefab に含める**(手ボーン下に3体を子として置き、`WeaponManager._weapons[]` に登録。選択中1本だけ `SetActive` で表示・切替の詳細は `Features/Player/Scripts/WeaponManager.cs`)。リグの子なのでリグと一緒に常駐・持ち越される
+- **武器3種(剣・弓・鎌)のモデルと `WeaponManager` も同じ Prefab に含める**(手ボーン下に3体を子として置き、`WeaponManager._weapons[]` に登録。モデルは3種とも仕込むが、**所持は初期0本**でイベントの `giveWeapon` で増える。選択中1本だけ `SetActive` で表示、未入手は非表示。切替の詳細は `Features/Player/Scripts/WeaponManager.cs`)。リグの子なのでリグと一緒に常駐・持ち越される
 
 **② Prefab をスロットにドラッグ**
 - `01_Title` を開く → `GameStarter` を選択 → Inspector の **Player Rig Prefab** スロットへ、①の `PlayerRig` Prefab をドラッグ
@@ -53,7 +53,7 @@ sequenceDiagram
         GS-->>T: 生成したリグを返す
     end
     T->>SC: LoadScene(フィールド)
-    Note over T,SC: 「続きから」は Load() で進行度・所持品を復元し<br/>シーン起動後に RestorePlayerState(座標・現在HP・選択武器)
+    Note over T,SC: 「続きから」は Load() で進行度・所持品を復元し<br/>シーン起動後に RestorePlayerState(座標・現在HP・入手ずみ武器・選択武器)
 ```
 
 ---
