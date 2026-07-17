@@ -32,7 +32,8 @@
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
 | [`PlayerImplementation.md`](./PlayerImplementation.md) | **プレイヤー実装**。リグ生成・常駐・単一化の手順 + Title からの生成フロー |
+| [`SceneImplementation.md`](./SceneImplementation.md) | **シーン遷移の実装**。新規開始の遷移先(開始フィールド)定義・エリア出入口(`SceneExit`)・到着スポーン配置・`SceneController` のロードフロー |
 | [`EventImplementation.md`](./EventImplementation.md) | **イベント発火の実装**。取り込み〜トリガー設置〜再生の手順(`battle` の **敵の作成・配置・戦闘** を含む)+ 呼び出しフロー図 |
 | [`UIImplementation.md`](./UIImplementation.md) | **UI 実装**。Prefab/Canvas 構成・`UiRouter`(排他)・`HudIconBar` のモード連動(右上アイコンバーの出し入れ) |
-| [`CraftingArchitecture.md`](./CraftingArchitecture.md) | **調合アーキテクチャ**。カタログDB・画像/名前の事前生成・実行時フロー |
+| [`CraftingArchitecture.md`](./CraftingArchitecture.md) | **調合アーキテクチャ**。ScriptableObject カタログ(手作業・非AIの少数セット)・レシピ発見/解禁・実行時フロー |
 | [`CraftingStatAlgorithm.md`](./CraftingStatAlgorithm.md) | **調合ステータス算出**。素材2つから結果ステータスを決める数理モデル |
