@@ -46,7 +46,7 @@
 
 ## 2. 関数レベルのフロー(EventPlayer)
 
-- `EventTrigger` は Unity がコライダ侵入で叩く。条件を満たせば `EventPlayer.Play()` を呼ぶだけ。
+- `EventTrigger` は Unity がコライダ侵入で叩く。`GameModeManager` のモードを見て **戦闘中なら発火しない**(会話中の多重発火・戦闘中の割り込みを防ぐ)。移動中で進行度・フラグ条件を満たせば `EventPlayer.Play()` を呼ぶだけ。
 - `EventPlayer` が会話ステップを順に実行し、各ステップで他システム(会話UI・`GameModeManager`・`InventoryManager`・`ProgressManager`)を叩く。ここが他システムを **指揮する層**(会話→戦闘→会話…)。
 - `ProgressManager` は **状態を持つだけ**。進行度・フラグを読ませ／書かせ、変わったら通知する。
 
@@ -63,9 +63,11 @@ sequenceDiagram
     participant BR as BattleRunner
 
     U->>ET: OnTriggerEnter(player)
+    ET->>GMM: 現在モードを読む
+    Note over ET: 戦闘中なら発火しない(何もしない)
     ET->>PM: Progress / GetFlag を読む
-    ET->>ET: 条件評価(progress/flag すべて満たす?)
-    ET->>EP: Play(eventDef, enemy, ct)
+    ET->>ET: 条件評価(モード=Field かつ progress/flag すべて満たす?)
+    ET->>EP: Play(eventDef, battle)
     loop 会話ステップ
         alt line
             EP->>TALK: ShowLine(speaker, portrait, text)
@@ -77,7 +79,7 @@ sequenceDiagram
             EP->>INV: Add(itemKey)
         else battle
             EP->>GMM: EnterBattle()
-            EP->>BR: Run(enemy)
+            EP->>BR: Run(battle)
             Note over BR: 配線した敵 Prefab をトリガー位置に出し撃破まで待つ(下の BattleRunner)
             BR-->>EP: 撃破で復帰(敗北時は直近セーブ再開で復帰しない)
             EP->>GMM: ExitBattle()
@@ -99,7 +101,7 @@ sequenceDiagram
     participant EN as 敵をインスタンス化(Prefab)
 
     EP->>GM: EnterBattle()
-    EP->>BR: Run(enemy)
+    EP->>BR: Run(battle)
     BR->>EN: 生成(トリガー位置)
     Note over BR,EN: EnemyStatus.OnDeathTriggered を購読
     EN-->>BR: OnDeathTriggered(撃破)
