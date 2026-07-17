@@ -11,7 +11,7 @@
 **① `events.json` を取り込む**
 - 物語班が `events.json` を書く(既定パス `_Project/Features/Scenario/events.json`。
 - **`Tools > CreativeAI > Import Events`** を実行 → `_Project/Features/Scenario/Data/Dialogues/{id}.asset` が **1イベント=1 .asset** で生成される。
-- **Importer が弾くもの**(打ち間違い対策):必須フィールド欠落・id 重複・未知の `type`/`kind`・`battle` 位置制約(先頭/末尾は line)・**`battle` は1イベントに最大1つ**・**`progress` 条件を必ず1つ含む**・**`nextProgress` 必須(`progress` の `value` より大きい)**・portrait キー照合。`itemKey` は **カタログがあれば弾く**(`ItemData` の key。未作成なら警告どまり)。エラーが1件でもあれば **1件も書き出さず**全診断を Console に出す
+- **Importer が弾くもの**(打ち間違い対策):必須フィールド欠落・id 重複・未知の `type`/`kind`・`battle` 位置制約(先頭/末尾は line)・**`battle` は1イベントに最大1つ**・**`progress` 条件を必ず1つ含む**・**`nextProgress` 必須(`progress` の `value` より大きい)**・portrait キー照合。`itemKey` は **カタログがあれば弾く**(`ItemData` の key。未作成なら警告どまり)。`weaponKey` は **剣/弓/鎌の3種以外を弾く**。エラーが1件でもあれば **1件も書き出さず**全診断を Console に出す
 
 **② 発火位置ごとに `EventTrigger` を置く**
 座標は JSON に書かない。**イベントが起こる場所はシーン上に手で置く**。
@@ -47,7 +47,7 @@
 ## 2. 関数レベルのフロー(EventPlayer)
 
 - `EventTrigger` は Unity がコライダ侵入で叩く。`GameModeManager` のモードを見て **戦闘中なら発火しない**(会話中の多重発火・戦闘中の割り込みを防ぐ)。移動中で進行度・フラグ条件を満たせば `EventPlayer.Play()` を呼ぶだけ。
-- `EventPlayer` が会話ステップを順に実行し、各ステップで他システム(会話UI・`GameModeManager`・`InventoryManager`・`ProgressManager`)を叩く。ここが他システムを **指揮する層**(会話→戦闘→会話…)。
+- `EventPlayer` が会話ステップを順に実行し、各ステップで他システム(会話UI・`GameModeManager`・`InventoryManager`・`WeaponManager`・`ProgressManager`)を叩く。ここが他システムを **指揮する層**(会話→戦闘→会話…)。
 - `ProgressManager` は **状態を持つだけ**。進行度・フラグを読ませ／書かせ、変わったら通知する。
 
 ```mermaid
@@ -60,6 +60,7 @@ sequenceDiagram
     participant TALK as 会話UI
     participant GMM as GameModeManager
     participant INV as InventoryManager
+    participant WM as WeaponManager(プレイヤーリグ)
     participant BR as BattleRunner
 
     U->>ET: OnTriggerEnter(player)
@@ -77,6 +78,9 @@ sequenceDiagram
             EP->>PM: SetFlag(key, value)
         else giveItem
             EP->>INV: Add(itemKey)
+        else giveWeapon
+            EP->>WM: Add(weaponKey)
+            Note over WM: 初入手なら所持本数の変化を武器切替UIへ通知(0→1で表示)
         else battle
             EP->>GMM: EnterBattle()
             EP->>BR: Run(battle)
