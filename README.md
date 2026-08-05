@@ -6,8 +6,6 @@
 
 ## 書き方のルール
 
-- **1つのトピックは1ドキュメントにだけ書く**。同じ内容を複数の場所に書かない(重複は矛盾のもと)。
-- 他トピックに触れるときは **本文をコピーせず、そのドキュメントへリンク** する。
 - 実装・制作で仕様と食い違いを見つけたら、**コードや素材ではなく、まずドキュメントを直す**。
 
 ---
@@ -24,7 +22,7 @@
 
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
-| [`Specification.md`](./Specification.md) | **仕様書の本体**。プロジェクト前提(確定事項)/ プレイヤーステータス / インベントリ・アイテム・装備 / シーン / 進行管理 / UI・オーバーレイ / 常駐アーキテクチャ |
+| [`Specification.md`](./Specification.md) | **仕様書の本体**。プロジェクト前提(確定事項)/ プレイヤーステータス / インベントリ・アイテム・装備・**調合** / シーン / 進行管理 / UI・オーバーレイ / 常駐アーキテクチャ |
 | [`ScenarioReference.md`](./ScenarioReference.md) | **`events.json` フォーマット** + 立ち絵(`portrait`)・アイテム/武器(`itemKey`/`weaponKey`)キーのカタログ(物語班が手書きする書式) |
 
 ### 実装・アルゴリズム(How)
@@ -35,5 +33,4 @@
 | [`SceneImplementation.md`](./SceneImplementation.md) | **シーン遷移の実装**。新規開始の遷移先(開始フィールド)定義・エリア出入口(`SceneExit`)・到着スポーン配置・`SceneController` のロードフロー |
 | [`EventImplementation.md`](./EventImplementation.md) | **イベント発火の実装**。取り込み〜トリガー設置〜再生の手順(`battle` の **敵の作成・配置・戦闘** を含む)+ 呼び出しフロー図 |
 | [`UIImplementation.md`](./UIImplementation.md) | **UI 実装**。Prefab/Canvas 構成・`UiRouter`(排他)・`HudIconBar` のモード連動(右上アイコンバーの出し入れ) |
-| [`CraftingArchitecture.md`](./CraftingArchitecture.md) | **調合アーキテクチャ**。ScriptableObject カタログ(手作業・非AIの少数セット)・レシピ発見/解禁・実行時フロー |
 | [`CraftingStatAlgorithm.md`](./CraftingStatAlgorithm.md) | **調合ステータス算出**。素材2つから結果ステータスを決める数理モデル |
