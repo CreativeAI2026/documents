@@ -61,14 +61,14 @@
 
 | 装備品 | key |
 | ------ | --- |
-| 蛍光灯 | `fluorescent_lamp` |
+| 蛍光灯 | `fluorescent_light` |
 | 磁石 | `magnet` |
-| 辞書 | `dictionary` |
-| キーボード | `keyboard` |
+| ノート | `note` |
+| マイク | `microphone` |
 | メガネ | `glasses` |
-| 体温計 | `thermometer` |
-| 腕時計 | `wristwatch` |
-| 全身タイツ | `bodysuit` |
+| 風船 | `balloon` |
+| 懐中時計 | `clock` |
+| 全身タイツ | `full_body_tights` |
 | 傘 | `umbrella` |
 | 帽子 | `hat` |
 
@@ -78,18 +78,30 @@
 | ---- | --- |
 | りんご | `apple` |
 | ぶどう | `grapes` |
+| 桃 | `peach` |
 | バナナ | `banana` |
-| クッキー | `cookie` |
+| クリーム玄米クッキー | `brown_rice_cream_cookie` |
 | コーヒー | `coffee` |
 | みかんジュース | `orange_juice` |
-| クリーム玄米 | `cream_brown_rice` |
-| お米 | `rice` |
-| ゼリー | `jelly` |
+| 白米 | `white_rice` |
+| いちごゼリー | `strawberry_jelly` |
 | 味噌汁 | `miso_soup` |
 
 ### 大事なもの — `giveItem` の `itemKey`
 
-**現状は大事なものを1つも用意していない**。時間があれば...
+| 大事なもの | key |
+| ---------- | --- |
+| カードキー | `card_key` |
+| 形見のアクセサリー | `keepsake_accessory` |
+| 汚れたレコード | `dirty_record` |
+| 壊れたロボット | `broken_robot` |
+| 機密書類１ | `classified_document_1` |
+| 機密書類２ | `classified_document_2` |
+| 機密書類３ | `classified_document_3` |
+| 謎の手記１ | `mysterious_note_1` |
+| 謎の手記２ | `mysterious_note_2` |
+| 謎の手記３ | `mysterious_note_3` |
+| 謎の鍵 | `mysterious_key` |
 
 ---
 
@@ -140,6 +152,17 @@
         { "kind": "line", "speaker": "はかなげ少女", "portrait": "girl_smile", "text": "ここまで一緒に来られたね。" }
       ],
       "nextProgress": 9            // 必須。進行度を 9 へ進め、8 でなくなるので二度と発火しない
+    },
+    {
+      "id": "locked_door",
+      "conditions": [
+        { "type": "progress", "value": 10 },
+        { "type": "hasItem", "itemKey": "mysterious_key" }   // 「謎の鍵」(大事なもの)を所持していれば発火
+      ],
+      "steps": [
+        { "kind": "line", "speaker": "主人公", "portrait": "hero_normal", "text": "この鍵で開きそうだ。" }
+      ],
+      "nextProgress": 11
     }
   ]
 }
@@ -149,10 +172,20 @@
 
 | フィールド | 必須 | 内容 |
 | ---------- | ---- | ---- |
-| `id` | ○ | イベント識別子。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない) |
-| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` は同じ進行度での分岐に任意で足す |
+| `id` | ○ | イベント識別子。**物語班が命名する**(イベント内容がわかる英字 snake_case。例: `cave_encounter`)。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない)。**全イベントで一意**にする |
+| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` / `hasItem` は同じ進行度での分岐に任意で足す(下の「条件タイプ」参照) |
 | `steps[]` | ○ | 会話ステップの並び。`line` / `battle` / `giveItem` / `giveWeapon` / `choice` |
 | `nextProgress` | ○ | 終了時に進める進行度。**全イベント必須**で、`progress` の `value` **より大きく**する。イベントは進行度が `value` に一致したときだけ発火し、終了で進行度が進んで一致しなくなるので、**どのイベントもちょうど1回だけ発火する** |
+
+### 条件タイプ (`conditions[]` の `type`)
+
+| type | フィールド | 真になる条件 |
+| ---- | ---------- | ------------ |
+| `progress` | `value`(整数) | 進行度が `value` に**ちょうど一致**(必須・各イベント1つ以上) |
+| `flag` | `key` / `value`(文字列) | フラグ `key` の値が `value` に一致(`choice` で書き込んだ値の分岐に使う) |
+| `hasItem` | `itemKey`(文字列) | その **`itemKey` の「大事なもの」を1つ以上所持**していれば真 |
+
+> **`hasItem` の制約**: `itemKey` は **大事なものカタログ**。**「どれか1つ持っていれば」= 特定の1 key を指定**する。複数 `hasItem` を並べると AND(=全部所持)になる。「AのkeyかBのkeyのどちらか」のような OR は無い。
 
 > **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。
 
