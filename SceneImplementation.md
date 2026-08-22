@@ -33,7 +33,9 @@
 | 3 | 向きは GameObject の回転で決める(到着時にこの向きへ揃える) |
 
 - 開始フィールドには **開始用の SpawnPoint** を必ず1つ置き、②の Start Spawn にその ID を書く。
-- 到着時に指定 ID が見つからなければ **原点へフォールバックし警告**(クラッシュしない)。
+- 到着時に指定 ID が見つからなければ **原点へフォールバックし警告**(クラッシュしない)。ID が重複していても警告して先に見つかった方を使う。
+- コンポーネントと ID 検索・配置は `Features/Core/Scripts/SceneManagement/SpawnPoint.cs`(`SpawnPoint.Place(player, id)`)。`Field_Area01` には `PlayerSpawn_start`(ID `start`)を設置済み。
+- **`SceneController.LoadScene` はまだ spawn ID を受け取らない**(遷移時の自動配置は未実装 = 設計)。現時点で `SpawnPoint.Place` を呼んでいるのは開発用の直接 Play(`FieldDevBootstrap` → [PlayerImplementation.md](./PlayerImplementation.md))だけ。
 
 **④ エリアの出入口に `SceneExit` を置く**
 フィールド間の移動はここが担当する。**発火位置と遷移先の対応**をシーン上に手で置く(会話イベントの `EventTrigger` と同じ流儀 → [EventImplementation.md](./EventImplementation.md))。
@@ -46,7 +48,7 @@
 | 4 | **Dest Scene** に遷移先の **シーン名**、**Dest Spawn** に遷移先の **SpawnPoint ID** を入れる |
 | 5 | プレイヤー(`PlayerRig`)側に **Tag `Player` + Rigidbody + Collider** があるか確認(`OnTriggerEnter` 前提) |
 
-- 遷移中は **ロードオーバーレイ**(シーンではなく常駐 Canvas の UI → [UIImplementation.md](./UIImplementation.md))が覆い、完了で消える。
+- 遷移中は **ロードオーバーレイ**(シーンではなく常駐 Canvas の UI)が覆い、完了で消える。
 - 遷移は **移動中(Field)のみ**。戦闘モード中・会話UI表示中は出口を踏んでも遷移しない。
 
 ### 確認(Play)
