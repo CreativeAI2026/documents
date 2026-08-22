@@ -78,15 +78,21 @@ sequenceDiagram
             EP->>PM: SetFlag(key, value)
         else giveItem
             EP->>INV: Add(itemKey)
+            EP->>TALK: ShowItemGet(itemKey, message)
+            Note over TALK: アイコンと名前は itemKey から UI 側が引く(送り入力まで待つ)
         else giveWeapon
             EP->>WM: Add(weaponKey)
             Note over WM: 初入手なら所持本数の変化を武器切替UIへ通知(0→1で表示)
+            EP->>TALK: ShowWeaponGet(weaponKey, message)
         else battle
             EP->>GMM: EnterBattle()
             EP->>BR: Run(battle)
             Note over BR: 配線した敵 Prefab をトリガー位置に出し撃破まで待つ(下の BattleRunner)
             BR-->>EP: 撃破で復帰(敗北時は直近セーブ再開で復帰しない)
             EP->>GMM: ExitBattle()
+        else command
+            EP->>TALK: RunCommand(command, arg)
+            Note over TALK: 立ち絵を揺らす/ウィンドウを隠す等の演出(ScenarioReference.md「演出コマンド」)
         end
     end
     EP->>PM: AdvanceTo(nextProgress)
