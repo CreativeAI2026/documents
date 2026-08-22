@@ -24,6 +24,7 @@
 | ------------ | ---------- |
 | [`Specification.md`](./Specification.md) | **仕様書の本体**。プロジェクト前提(確定事項)/ プレイヤーステータス / インベントリ・アイテム・装備・**調合** / シーン / 進行管理 / UI・オーバーレイ / 常駐アーキテクチャ |
 | [`ScenarioReference.md`](./ScenarioReference.md) | **`events.json` フォーマット** + 立ち絵(`portrait`)・アイテム/武器(`itemKey`/`weaponKey`)キーのカタログ(物語班が手書きする書式) |
+| [`MapLayout.md`](./MapLayout.md) | **マップの形状定義** |
 
 ### 実装・アルゴリズム(How)
 
@@ -32,5 +33,5 @@
 | [`PlayerImplementation.md`](./PlayerImplementation.md) | **プレイヤー実装**。リグ生成・常駐・単一化の手順 + Title からの生成フロー |
 | [`SceneImplementation.md`](./SceneImplementation.md) | **シーン遷移の実装**。新規開始の遷移先(開始フィールド)定義・エリア出入口(`SceneExit`)・到着スポーン配置・`SceneController` のロードフロー |
 | [`EventImplementation.md`](./EventImplementation.md) | **イベント発火の実装**。取り込み〜トリガー設置〜再生の手順(`battle` の **敵の作成・配置・戦闘** を含む)+ 呼び出しフロー図 |
-| [`UIImplementation.md`](./UIImplementation.md) | **UI 実装**。Prefab/Canvas 構成・`UiRouter`(排他)・`HudIconBar` のモード連動(右上アイコンバーの出し入れ) |
-| [`CraftingStatAlgorithm.md`](./CraftingStatAlgorithm.md) | **調合ステータス算出**。素材2つから結果ステータスを決める数理モデル |
+| [`StatRollAlgorithm.md`](./StatRollAlgorithm.md) | **ステータス算出**。装備品のステータスを決める数理モデル(調合＝素材2つから / ドロップ＝拾得時のロール) |
+| [`PropPlacementWorkflow.md`](./PropPlacementWorkflow.md) | **小物配置の分担**。`Field_Area01` に複数人で同時に小物を置くための段取り(担当ごとの小物シーン・統合・マップ再生成との関係) |
