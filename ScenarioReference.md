@@ -59,6 +59,7 @@
 | 剣 | `sword` |
 | 弓 | `bow` |
 | 鎌 | `scythe` |
+| ハンマー | `hammer` |
 
 ### 装備品 — `giveItem` の `itemKey`
 
