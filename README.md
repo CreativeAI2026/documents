@@ -11,3 +11,4 @@
 | [`ConversationPreview.md`](./ConversationPreview.md) | `events.json` の会話を `UI_ConversationPreview` シーンで再生して確認する手順 |
 | [`EventPlacement.md`](./EventPlacement.md) | `events.json` のイベントをフィールドのイベント用シーンに置いて発火させる手順 |
 | [`ItemImageReplacement.md`](./ItemImageReplacement.md) | アイテム画像の差し替えと、合成前の素材を別のアイテムに変える手順 |
+| [`RigComposition.md`](./RigComposition.md) | フィールドのプレイヤー・カメラの仕組みと、戦闘班が触る場所 |
