@@ -150,6 +150,15 @@
             { "text": "一緒に行く",   "value": "together" },
             { "text": "ひとりで行く", "value": "alone" }
         ]},
+        // 選択直後に同じflagを読む。選んだ枝だけ実行し、その後は共通のlineへ合流する
+        { "kind": "branch", "flag": "girl_choice", "cases": {
+            "together": [
+              { "kind": "line", "portrait": "girl_smile", "text": "一緒に行けるなら心強いです。" }
+            ],
+            "alone": [
+              { "kind": "line", "portrait": "girl_wry_smile", "text": "気をつけてくださいね。" }
+            ]
+        }},
         { "kind": "line", "portrait": "hero_normal", "text": "…そうか。" }
       ],
       "nextProgress": 6            // 終了時に進行度を 6 へ。5 でなくなるので入り直しても二度と発火しない=1回きり
@@ -187,11 +196,20 @@
     {
       "id": "locked_door",
       "conditions": [
-        { "type": "progress", "value": 10 },
-        { "type": "hasItem", "itemKey": "mysterious_key" }   // 「謎の鍵」(大事なもの)を所持していれば発火
+        { "type": "progress", "value": 10 }   // 所持判定は発火条件ではなく、下のbranchで行う
       ],
       "steps": [
-        { "kind": "line", "portrait": "hero_normal", "text": "この鍵で開きそうだ。" }
+        // 大事なものの所持でthen / elseの片方を実行。省略・空配列の枝は何もせず合流する
+        { "kind": "branch", "hasItem": "mysterious_key",
+          "then": [
+            { "kind": "line", "portrait": "hero_normal", "text": "この鍵で開きそうだ。" }
+          ],
+          "else": [
+            { "kind": "line", "portrait": "hero_question", "text": "扉に合う鍵を探そう。" }
+          ]
+        },
+        // nextProgressは枝ごとに書かず、イベントのものを共通で使う
+        { "kind": "line", "text": "一行は扉の様子を確かめ、探索へ戻った。" }
       ],
       "nextProgress": 11
     }
@@ -218,6 +236,7 @@
 | `giveWeapon` | `weaponKey`(必須) / `message` | 武器を渡し、**入手演出**(3Dモデル + 文)を出す |
 | `battle` | なし | 戦闘。敵は JSON に書かず `EventTrigger` に配線する |
 | `command` | `command`(必須) / `arg` | 会話UIの**演出コマンド**を1つ実行する(下表) |
+| `branch` | `flag` + `cases`、または `hasItem` + `then` / `else`（同時指定不可） | 一致する枝だけ実行して共通の続きへ合流。未一致・空の枝はスキップ。**分岐は1段まで**で、枝内は `line` / `giveItem` / `giveWeapon` / `command` のみ。枝内の `choice` / `branch` / `battle` は禁止。`nextProgress` はイベントに1つだけ |
 
 > **`message` は省略可**。省略すると `giveItem` は `{アイテム名}を手に入れた。` を自動で組み立てる。`giveWeapon` は自動で組み立てないので、省略すると文なし(3Dモデルだけ)で表示される。
 > `giveWeapon` の 3Dモデルは `WeaponData` にまだモデル参照が無いため、当面はダミーモデルで表示される。
@@ -266,41 +285,6 @@
 
 > **`hasItem` の制約**: `itemKey` は **大事なものカタログ**。**「どれか1つ持っていれば」= 特定の1 key を指定**する。複数 `hasItem` を並べると AND(=全部所持)になる。「AのkeyかBのkeyのどちらか」のような OR は無い。
 
-> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。
+> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。分岐内には置かず、先頭・末尾の `line` も共通の `steps[]` に置く。
 
 ---
-
-## 会話の途中で分岐する（Issue #99）
-
-公開シナリオエディタ: https://creativeai2026.github.io/game/scenario-editor/
-
-`branch`は条件に一致する経路だけを再生して、次の共通ステップへ合流する。JSONは次のネスト形式で書く。
-
-```json
-{ "kind": "branch", "flag": "route", "cases": {
-  "together": [{ "kind": "line", "text": "一緒に行こう。" }],
-  "wait": [{ "kind": "line", "text": "ここで待とう。" }]
-}}
-```
-
-- `flag`の現在値とcasesのキーを完全一致で照合する。未設定・未一致なら何も再生せず共通ステップへ進む。choiceが同じフラグへ記録した値、過去イベントのフラグも使える。
-- 同イベントに同フラグのchoiceがある場合、optionsのvalueとcasesの不足・余剰キーをImporterが警告する。重複value・重複JSONキーはエラーになる。
-
-```json
-{ "kind": "branch", "hasItem": "card_key",
-  "then": [{ "kind": "line", "text": "カードキーを持っている。" }],
-  "else": [{ "kind": "line", "text": "カードキーはまだない。" }]
-}
-```
-
-- `hasItem`は既存条件と同じ大事なもの専用のキーで判定する。then/elseはどちらも省略可能。省略・空配列ならその経路を通過する。
-- flagとhasItemの同時指定は禁止。flagはcases、hasItemはthen/elseを使い、混在しない。
-- 分岐は1段だけ。内部のchoice・branchは禁止。line / giveItem / giveWeapon / command / battleは既存制約の範囲で使える。
-- nextProgressはイベントに1つだけ。分岐内に書かない。battle最大1つ、battleを含む場合の共通ステップの先頭・末尾はlineという既存制約を維持する。
-- JSONはネストのまま管理する。Unity取り込み時だけ、シリアライズできるケース配列と前方ジャンプ・合流位置へ変換する。手作業でインデックスを書く必要はない。
-
-## Webでの編集
-
-会話は縦のカードで編集し、選択肢の「対応する分岐を作る」で選択値に対応する枝を作れる。枝は並列レーンと合流表示で編集する。画像を含む編集プロジェクトのバックアップと、Unity用JSONの出力は別操作。GitHubへの保存は限定権限PATをメモリ内だけに保持して作業ブランチ＋PRを作る方式で、mainへ直接保存しない。
-
-詳しい利用手順: https://github.com/CreativeAI2026/game/blob/feature/scenario-editor-branches/tools/scenario-editor/README.md
