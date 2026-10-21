@@ -205,7 +205,7 @@
 | ---------- | ---- | ---- |
 | `id` | ○ | イベント識別子。**物語班が命名する**(イベント内容がわかる snake_case = **小文字の英字・数字・`_` だけ**。例: `cave_encounter`。大文字や記号・日本語は取り込み時にエラー)。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない)。**全イベントで一意**にする |
 | `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` / `hasItem` は同じ進行度での分岐に任意で足す(下の「条件タイプ」参照) |
-| `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `giveItem` / `giveWeapon` / `battle` / `command` |
+| `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `giveItem` / `giveWeapon` / `battle` / `command` / `branch` |
 | `nextProgress` | ○ | 終了時に進める進行度。**全イベント必須**で、`progress` の `value` **より大きく**する。イベントは進行度が `value` に一致したときだけ発火し、終了で進行度が進んで一致しなくなるので、**どのイベントもちょうど1回だけ発火する** |
 
 ### ステップの種類 (`steps[]` の `kind`)
@@ -269,3 +269,38 @@
 > **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。
 
 ---
+
+## 会話の途中で分岐する（Issue #99）
+
+公開シナリオエディタ: https://creativeai2026.github.io/game/scenario-editor/
+
+`branch`は条件に一致する経路だけを再生して、次の共通ステップへ合流する。JSONは次のネスト形式で書く。
+
+```json
+{ "kind": "branch", "flag": "route", "cases": {
+  "together": [{ "kind": "line", "text": "一緒に行こう。" }],
+  "wait": [{ "kind": "line", "text": "ここで待とう。" }]
+}}
+```
+
+- `flag`の現在値とcasesのキーを完全一致で照合する。未設定・未一致なら何も再生せず共通ステップへ進む。choiceが同じフラグへ記録した値、過去イベントのフラグも使える。
+- 同イベントに同フラグのchoiceがある場合、optionsのvalueとcasesの不足・余剰キーをImporterが警告する。重複value・重複JSONキーはエラーになる。
+
+```json
+{ "kind": "branch", "hasItem": "card_key",
+  "then": [{ "kind": "line", "text": "カードキーを持っている。" }],
+  "else": [{ "kind": "line", "text": "カードキーはまだない。" }]
+}
+```
+
+- `hasItem`は既存条件と同じ大事なもの専用のキーで判定する。then/elseはどちらも省略可能。省略・空配列ならその経路を通過する。
+- flagとhasItemの同時指定は禁止。flagはcases、hasItemはthen/elseを使い、混在しない。
+- 分岐は1段だけ。内部のchoice・branchは禁止。line / giveItem / giveWeapon / command / battleは既存制約の範囲で使える。
+- nextProgressはイベントに1つだけ。分岐内に書かない。battle最大1つ、battleを含む場合の共通ステップの先頭・末尾はlineという既存制約を維持する。
+- JSONはネストのまま管理する。Unity取り込み時だけ、シリアライズできるケース配列と前方ジャンプ・合流位置へ変換する。手作業でインデックスを書く必要はない。
+
+## Webでの編集
+
+会話は縦のカードで編集し、選択肢の「対応する分岐を作る」で選択値に対応する枝を作れる。枝は並列レーンと合流表示で編集する。画像を含む編集プロジェクトのバックアップと、Unity用JSONの出力は別操作。GitHubへの保存は限定権限PATをメモリ内だけに保持して作業ブランチ＋PRを作る方式で、mainへ直接保存しない。
+
+詳しい利用手順: https://github.com/CreativeAI2026/game/blob/feature/scenario-editor-branches/tools/scenario-editor/README.md
