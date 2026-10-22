@@ -150,6 +150,15 @@
             { "text": "一緒に行く",   "value": "together" },
             { "text": "ひとりで行く", "value": "alone" }
         ]},
+        // 選択直後に同じflagを読む。選んだ枝だけ実行し、その後は共通のlineへ合流する
+        { "kind": "branch", "flag": "girl_choice", "cases": {
+            "together": [
+              { "kind": "line", "portrait": "girl_smile", "text": "一緒に行けるなら心強いです。" }
+            ],
+            "alone": [
+              { "kind": "line", "portrait": "girl_wry_smile", "text": "気をつけてくださいね。" }
+            ]
+        }},
         { "kind": "line", "portrait": "hero_normal", "text": "…そうか。" }
       ],
       "nextProgress": 6            // 終了時に進行度を 6 へ。5 でなくなるので入り直しても二度と発火しない=1回きり
@@ -194,6 +203,27 @@
         { "kind": "line", "portrait": "hero_normal", "text": "この鍵で開きそうだ。" }
       ],
       "nextProgress": 11
+    },
+    {
+      "id": "key_inventory_check",
+      "conditions": [
+        { "type": "progress", "value": 11 }
+      ],
+      "steps": [
+        { "kind": "line", "text": "扉の先で、手元の荷物を確かめた。" },
+        // conditionsのhasItemは「発火するか」。branchのhasItemは「会話内のどちらの枝を再生するか」
+        { "kind": "branch", "hasItem": "card_key",
+          "then": [
+            { "kind": "line", "portrait": "hero_normal", "text": "カードキーも手元にある。" }
+          ],
+          "else": [
+            { "kind": "line", "portrait": "hero_question", "text": "カードキーを探しておこう。" }
+          ]
+        },
+        // 所持・未所持のどちらでも共通のlineへ合流し、イベントのnextProgressへ進む
+        { "kind": "line", "text": "一行は荷物をまとめ、探索を続けた。" }
+      ],
+      "nextProgress": 12
     }
   ]
 }
@@ -205,7 +235,7 @@
 | ---------- | ---- | ---- |
 | `id` | ○ | イベント識別子。**物語班が命名する**(イベント内容がわかる snake_case = **小文字の英字・数字・`_` だけ**。例: `cave_encounter`。大文字や記号・日本語は取り込み時にエラー)。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない)。**全イベントで一意**にする |
 | `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` / `hasItem` は同じ進行度での分岐に任意で足す(下の「条件タイプ」参照) |
-| `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `giveItem` / `giveWeapon` / `battle` / `command` |
+| `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `giveItem` / `giveWeapon` / `battle` / `command` / `branch` |
 | `nextProgress` | ○ | 終了時に進める進行度。**全イベント必須**で、`progress` の `value` **より大きく**する。イベントは進行度が `value` に一致したときだけ発火し、終了で進行度が進んで一致しなくなるので、**どのイベントもちょうど1回だけ発火する** |
 
 ### ステップの種類 (`steps[]` の `kind`)
@@ -218,6 +248,7 @@
 | `giveWeapon` | `weaponKey`(必須) / `message` | 武器を渡し、**入手演出**(3Dモデル + 文)を出す |
 | `battle` | なし | 戦闘。敵は JSON に書かず `EventTrigger` に配線する |
 | `command` | `command`(必須) / `arg` | 会話UIの**演出コマンド**を1つ実行する(下表) |
+| `branch` | `flag` + `cases`、または `hasItem` + `then` / `else`（同時指定不可） | 一致する枝だけ実行して共通の続きへ合流。未一致・空の枝はスキップ。**分岐は1段まで**で、枝内は `line` / `giveItem` / `giveWeapon` / `command` のみ。枝内の `choice` / `branch` / `battle` は禁止。`nextProgress` はイベントに1つだけ |
 
 > **`message` は省略可**。省略すると `giveItem` は `{アイテム名}を手に入れた。` を自動で組み立てる。`giveWeapon` は自動で組み立てないので、省略すると文なし(3Dモデルだけ)で表示される。
 > `giveWeapon` の 3Dモデルは `WeaponData` にまだモデル参照が無いため、当面はダミーモデルで表示される。
@@ -266,6 +297,6 @@
 
 > **`hasItem` の制約**: `itemKey` は **大事なものカタログ**。**「どれか1つ持っていれば」= 特定の1 key を指定**する。複数 `hasItem` を並べると AND(=全部所持)になる。「AのkeyかBのkeyのどちらか」のような OR は無い。
 
-> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。
+> **`battle` ステップの制約**: `steps[]` の並び順は自由だが、**`battle` は必ず会話の途中に置く**(先頭・末尾は `line`。戦闘が単独・末尾にならない)。**1イベントにつき `battle` は最大1つ**。分岐内には置かず、先頭・末尾の `line` も共通の `steps[]` に置く。
 
 ---
