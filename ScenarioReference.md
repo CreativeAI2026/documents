@@ -196,22 +196,34 @@
     {
       "id": "locked_door",
       "conditions": [
-        { "type": "progress", "value": 10 }   // 所持判定は発火条件ではなく、下のbranchで行う
+        { "type": "progress", "value": 10 },
+        { "type": "hasItem", "itemKey": "mysterious_key" }   // 「謎の鍵」(大事なもの)を所持していれば発火
       ],
       "steps": [
-        // 大事なものの所持でthen / elseの片方を実行。省略・空配列の枝は何もせず合流する
-        { "kind": "branch", "hasItem": "mysterious_key",
-          "then": [
-            { "kind": "line", "portrait": "hero_normal", "text": "この鍵で開きそうだ。" }
-          ],
-          "else": [
-            { "kind": "line", "portrait": "hero_question", "text": "扉に合う鍵を探そう。" }
-          ]
-        },
-        // nextProgressは枝ごとに書かず、イベントのものを共通で使う
-        { "kind": "line", "text": "一行は扉の様子を確かめ、探索へ戻った。" }
+        { "kind": "line", "portrait": "hero_normal", "text": "この鍵で開きそうだ。" }
       ],
       "nextProgress": 11
+    },
+    {
+      "id": "key_inventory_check",
+      "conditions": [
+        { "type": "progress", "value": 11 }
+      ],
+      "steps": [
+        { "kind": "line", "text": "扉の先で、手元の荷物を確かめた。" },
+        // conditionsのhasItemは「発火するか」。branchのhasItemは「会話内のどちらの枝を再生するか」
+        { "kind": "branch", "hasItem": "card_key",
+          "then": [
+            { "kind": "line", "portrait": "hero_normal", "text": "カードキーも手元にある。" }
+          ],
+          "else": [
+            { "kind": "line", "portrait": "hero_question", "text": "カードキーを探しておこう。" }
+          ]
+        },
+        // 所持・未所持のどちらでも共通のlineへ合流し、イベントのnextProgressへ進む
+        { "kind": "line", "text": "一行は荷物をまとめ、探索を続けた。" }
+      ],
+      "nextProgress": 12
     }
   ]
 }
