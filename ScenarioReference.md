@@ -283,9 +283,19 @@
 | `portrait.left.jump` / `portrait.right.jump` | — | 立ち絵を跳ねさせる(驚き・喜び) |
 | `wait` | **必須**(秒。0〜10) | その秒数だけ間を置く |
 | `conversation.close` | — | 会話ウィンドウを閉じる(イベントは続く)。**イベントの最後と `battle` の直前は自動で閉じる**ので、そこには書かなくてよい |
-| `camera.*` / `background.*` | 任意 | 会話UIの外へ委譲する枠。**受け手は未実装**なので、書いても今は何も起きない |
+| `background.black` | — | 会話の背景(立ち絵・ウィンドウの背面)を即座に真っ暗にする。会話が終わると自動で消える |
+| `background.black.fill` | 秒数(省略時 1。0〜10) | 背景が透明から黒へフェードして暗転する(フェード完了まで待つ) |
+| `background.black.clear` | 秒数(省略時 1。0〜10) | 黒い背景が薄れて消えていく(フェード完了まで待つ)。`background.black` / `fill` で暗くした後に使う |
+| `camera.*` / 上記以外の `background.*` | 任意 | 会話UIの外へ委譲する枠。**受け手は未実装**なので、書いても今は何も起きない |
 
 > 表に無いコマンド名は取り込み時にエラーで弾く(`camera.` / `background.` で始まるものだけは通す)。
+
+> 例: 暗い状態から始めて、数行しゃべったあとに背景を見せる。
+> ```jsonc
+> { "kind": "command", "command": "background.black" },
+> { "kind": "line", "text": "……う……。" },
+> { "kind": "command", "command": "background.black.clear", "arg": "1.5" },  // 1.5秒かけて黒が消える
+> ```
 
 ### 条件タイプ (`conditions[]` の `type`)
 
