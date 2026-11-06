@@ -292,11 +292,11 @@
 | `background.color` | **必須**(色) | 背景を指定色で即座に覆う。色は `#RRGGBB` か `white` / `red` など。回想の白・危機の赤など |
 | `background.fill` | **必須**(`色` または `色,秒数`) | 背景が指定色へフェードして覆う。例: `#FFFFFF,1.5`。消すのは `background.clear` |
 | `background.flash` | 省略可(`色` または `色,秒数`。既定 白・0.4秒) | 画面全体を一瞬光らせて薄れる(雷・被弾)。立ち絵やウィンドウの上に重なる |
-| `background.image` | **必須**(画像キー) または `キー,秒数` | 背景に画像を重ねる(既定 0.5秒でフェードイン)。画像は `Resources/ConversationBackgrounds/{キー}`(Sprite)。消すのは `background.image.clear` |
+| `background.image` | **必須**(画像キー) または `キー,秒数` | 背景に画像を重ねる(既定 0.5秒でフェードイン)。キーと画像は ConversationView の **Backgrounds** に登録する(Sprite)。消すのは `background.image.clear` |
 | `background.image.clear` | 秒数(省略時 0.5) | 背景画像を消す |
 | `camera.shake` | 揺れの大きさ(省略時 0.5。小0.2 / 中0.5 / 大1.0) | カメラを揺らす(足音・衝撃)。シーンに `CameraShakeManager` が必要 |
-| `sound.se` | **必須**(音キー) | 効果音を1回鳴らす。音は `Resources/ConversationSounds/{キー}`(SoundCue) |
-| `sound.bgm` | **必須**(`キー` または `キー,フェード秒`) | BGM を切り替える(既定 1秒でクロスフェード)。音は SE と同じ場所 |
+| `sound.se` | **必須**(音キー) | 効果音を1回鳴らす。キーと音は ConversationView の **Sounds** に登録する(SoundCue は Audio/SoundCue に置いたものを割り当てる) |
+| `sound.bgm` | **必須**(`キー` または `キー,フェード秒`) | BGM を切り替える(既定 1秒でクロスフェード)。キーの登録先は SE と同じ(Sounds) |
 | `sound.bgm.stop` | 秒数(省略時 1) | BGM をフェードアウトして止める |
 | `camera.*` / 上記以外の `background.*` | 任意 | 会話UIの外へ委譲する枠。**受け手は未実装**なので、書いても今は何も起きない |
 
