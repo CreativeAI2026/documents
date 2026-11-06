@@ -266,6 +266,8 @@
 | `<whisper>〜</whisper>` | 85%サイズ＋薄い青灰色にする |
 | `<shout>〜</shout>` | 115%サイズ＋太字にする |
 | `<emphasis>〜</emphasis>` | 水色の太字で強調する |
+| `<speed=2>〜</speed>` | 文字送りの速さを倍率で変える(2 で2倍速、0.5 で半分。0.1〜5)。`</speed>` で元の速さに戻る |
+| `<auto=1.5>` | 行のどこかに書くと、表示しきってから 1.5 秒後に**送り入力なしで次へ進む**(0〜10秒)。送り入力を押せばすぐ進む。唸り声など「間を置いて続けたい声」用 |
 
 - 上記以外の `<...>` は **TextMeshPro のタグとしてそのまま通す**(`<color=#FF0000>` など)。
 - `portrait` を**書かない**と**地の文(ナレーション)**になる。立ち絵も名前欄も出ず、履歴では `NOTE` 扱いになる。
@@ -283,9 +285,19 @@
 | `portrait.left.jump` / `portrait.right.jump` | — | 立ち絵を跳ねさせる(驚き・喜び) |
 | `wait` | **必須**(秒。0〜10) | その秒数だけ間を置く |
 | `conversation.close` | — | 会話ウィンドウを閉じる(イベントは続く)。**イベントの最後と `battle` の直前は自動で閉じる**ので、そこには書かなくてよい |
+| `portrait.show` | **必須**(portrait キー) | セリフなしで、そのキャラの立ち絵を立ち位置に出す(登場)。消すのは `portrait.left.hide` / `portrait.right.hide` |
 | `background.black` | — | 会話の背景(立ち絵・ウィンドウの背面)を即座に真っ暗にする。会話が終わると自動で消える |
 | `background.black.fill` | 秒数(省略時 1。0〜10) | 背景が透明から黒へフェードして暗転する(フェード完了まで待つ) |
-| `background.black.clear` | 秒数(省略時 1。0〜10) | 黒い背景が薄れて消えていく(フェード完了まで待つ)。`background.black` / `fill` で暗くした後に使う |
+| `background.black.clear` / `background.clear` | 秒数(省略時 1。0〜10) | 暗転が薄れて消えていく(フェード完了まで待つ)。`black` / `fill` / `color` で出した幕を消す |
+| `background.color` | **必須**(色) | 背景を指定色で即座に覆う。色は `#RRGGBB` か `white` / `red` など。回想の白・危機の赤など |
+| `background.fill` | **必須**(`色` または `色,秒数`) | 背景が指定色へフェードして覆う。例: `#FFFFFF,1.5`。消すのは `background.clear` |
+| `background.flash` | 省略可(`色` または `色,秒数`。既定 白・0.4秒) | 画面全体を一瞬光らせて薄れる(雷・被弾)。立ち絵やウィンドウの上に重なる |
+| `background.image` | **必須**(画像キー) または `キー,秒数` | 背景に画像を重ねる(既定 0.5秒でフェードイン)。画像は `Resources/ConversationBackgrounds/{キー}`(Sprite)。消すのは `background.image.clear` |
+| `background.image.clear` | 秒数(省略時 0.5) | 背景画像を消す |
+| `camera.shake` | 揺れの大きさ(省略時 0.5。小0.2 / 中0.5 / 大1.0) | カメラを揺らす(足音・衝撃)。シーンに `CameraShakeManager` が必要 |
+| `sound.se` | **必須**(音キー) | 効果音を1回鳴らす。音は `Resources/ConversationSounds/{キー}`(SoundCue) |
+| `sound.bgm` | **必須**(`キー` または `キー,フェード秒`) | BGM を切り替える(既定 1秒でクロスフェード)。音は SE と同じ場所 |
+| `sound.bgm.stop` | 秒数(省略時 1) | BGM をフェードアウトして止める |
 | `camera.*` / 上記以外の `background.*` | 任意 | 会話UIの外へ委譲する枠。**受け手は未実装**なので、書いても今は何も起きない |
 
 > 表に無いコマンド名は取り込み時にエラーで弾く(`camera.` / `background.` で始まるものだけは通す)。
