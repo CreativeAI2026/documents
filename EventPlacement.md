@@ -17,7 +17,7 @@
 6. Inspector の **Event** 欄にイベントの `.asset` をドラッグ
 7. `battle` を含むイベントなら **Enemy** に敵 Prefab を入れる(出現位置を変えたいときだけ **Spawn Point** に空の GameObject を指定)
 8. `Field_Area01_Events` を保存する
-9. メニュー **Tools > CreativeAI > Dev State Window** を開き、イベントを選んで「このイベントの発火直前の状態にする」を押す。そのイベントが発火する状態(進行度・フラグ・大事なもの)と、開始位置(そのイベントのトリガーの位置)が入る。確認したいプレイヤーの状態(武器・HP)や開始位置は手でも直せる(HP は 1〜1000)。「保存して Play」で保存先に書いて再生する。保存先は **自分用の `Features/Event/dev_state.local.json`**(`.gitignore` 済み。共有の `dev_state.json` は書き換えない)
+9. メニュー **Tools > CreativeAI > Dev State Window** を開き、イベントを選んで「このイベントの発火直前の状態にする」を押す。発火する状態(進行度・フラグ・大事なもの)と開始位置が入る。武器・HP・開始位置は手でも直せる(HP は 1〜1000)。「保存して Play」で自分用の `Features/Event/dev_state.local.json` に書いて再生する(共有の `dev_state.json` は書き換えない)
 10. `Field_Area01` を開いた状態で Play し、範囲に入って発火を確認する
 
 ```json
@@ -35,15 +35,15 @@
 ```
 
 - `dev_state.local.json`(無ければ共有の `dev_state.json`)が効くのは `Field_Area01` を直接 Play したときだけ(タイトルから始めたときは使われない)
-- `useSpawn` を `true` にすると、プレイヤーの開始位置を `spawnPosition`(足元の座標)・`spawnYaw`(向き)で上書きする。近くに歩ける床(NavMesh)があればその高さに合わせる。ウィンドウでイベントを選ぶと、そのトリガーの位置から入る
+- `useSpawn` を `true` にすると、開始位置を `spawnPosition`(足元の座標)・`spawnYaw`(向き)で上書きする
 - 武器・HP は本番のプレイヤーリグが入るまでは反映されない
 
 ## 注意
 
 - マップ本体(`Field_Area01`)にはイベントを置かない(担当者ごとにシーンを分けて git の競合を防ぐため)
 - `Field_Area01` に差分が出てもコミットしない
-- 机・椅子などの小物の置き場所を変えると、NavMesh(歩ける範囲。マップの道筋の線や敵の経路に使う)の焼き直しが必要になる。焼き直す(Tools > CreativeAI > Map > Bake NavMesh Field_Area01。小物シーンも自動で重ねて焼く)と Field_Area01 本体のシーンと NavMesh のデータが変わるので、**焼き直しとそのコミットはマップ担当だけが行う**。それ以外の人は、焼き直して差分が出ても、コミットしない。焼き直したあとは、アイテムが歩けない場所に入っていないか(Tools > CreativeAI > アイテムを配置)も確認する
-- 共有の `dev_state.json` は書き換えない(変更はコミットしない)。自分の設定は `dev_state.local.json` に書く(`.gitignore` 済みなので、開始位置のような人ごとの設定も git に入らない)
+- 小物の置き場所を変えたら NavMesh の焼き直し(Tools > CreativeAI > Map > Bake NavMesh Field_Area01)が必要。`Field_Area01` と NavMesh のデータが変わるので、**焼き直しとそのコミットはマップ担当だけが行う**。それ以外の人は差分が出てもコミットしない
+- 共有の `dev_state.json` の変更はコミットしない。自分の設定は `dev_state.local.json`(`.gitignore` 済み)に書く
 
 ## 発火のしかた
 
