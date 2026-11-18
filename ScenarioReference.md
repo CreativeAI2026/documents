@@ -39,6 +39,7 @@
 | # | 表情 | portrait キー |
 | - | ---- | ------------- |
 | 1 | 通常顔 | `robot_normal` |
+| 2 | 思考 | `robot_thinking` |
 
 ### 蓄音機の紳士 — `gramophone`
 
