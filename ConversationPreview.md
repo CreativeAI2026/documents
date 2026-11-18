@@ -4,7 +4,7 @@
 
 ## 手順
 
-1. `game/Assets/_Project/Features/Event/events.json` に置く
+1. `game/Assets/_Project/Features/Event/Data/events.json` に置く
 2. Unity で `Tools > CreativeAI > Import Events` → `events.json` を選択(エラーは Console に出る)
 3. `Features/Event/Data/` にイベントごとの `.asset` ができたことを確認
 4. `Scenes/UI/UI_ConversationPreview.unity` を開き、`ConversationPreviewDriver` が付いた GameObject を選択
