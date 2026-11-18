@@ -41,16 +41,16 @@
 
 ## 素材を別のアイテムに変える場合
 
-例: 装備品の風船(`balloon`)をランタン(`lantern`)に変える。素材1つにつき、その素材を使う合成後アイテム9個も入れ替わる。
+例: 装備品の風船(`balloon`)をランタン(`lantern`)に変える。素材1つにつき、その素材を使う合成後アイテム4個も入れ替わる。
 
-1. 古い素材の画像1枚と、合成後の画像9枚を消す
+1. 古い素材の画像1枚と、合成後の画像4枚を消す
    - `game/Assets/_Project/Art/UI/Items/Equipment/PreCraft/item_equipment_balloon.png`
-   - `game/Assets/_Project/Art/UI/Items/Equipment/PostCraft/item_equipment_balloon_*.png`(`balloon` を含む9枚)
-2. 新しい素材の画像1枚と、合成後の画像9枚を置く
+   - `game/Assets/_Project/Art/UI/Items/Equipment/PostCraft/item_equipment_balloon_*.png`(`balloon` を含む4枚)
+2. 新しい素材の画像1枚と、合成後の画像4枚を置く
    - `game/Assets/_Project/Art/UI/Items/Equipment/PreCraft/item_equipment_lantern.png`
-   - `game/Assets/_Project/Art/UI/Items/Equipment/PostCraft/item_equipment_clock_lantern.png` など9枚
+   - `game/Assets/_Project/Art/UI/Items/Equipment/PostCraft/item_equipment_clock_lantern.png` など4枚
 3. `game/Assets/_Project/Features/Inventory/items.json` の該当 key を書き換える
-   - 古い key(`balloon`、`balloon_clock` など10件)を消し、新しい key(`lantern`、`clock_lantern` など10件)の名前と説明を書く
+   - 古い key(`balloon`、`balloon_clock` など5件)を消し、新しい key(`lantern`、`clock_lantern` など5件)の名前と説明を書く
 4. Unity で `Tools > CreativeAI > アイテムを同期` を実行する
    - 画像に合わせて `ItemCatalog` の中身が作り直される(新しい素材・合成後のアイテムができ、古いものは消える)
 5. key の参照を新しい key に直す
