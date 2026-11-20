@@ -7,6 +7,7 @@
 | ドキュメント | 扱う範囲 |
 | ------------ | ---------- |
 | [`Specification.md`](./Specification.md) | **仕様書の本体** |
+| [`EventRecipes.md`](./EventRecipes.md) | **やりたいこと別**のイベントの書き方(ストーリー・調べる・範囲指定・分岐)と、できること / できないこと |
 | [`ScenarioReference.md`](./ScenarioReference.md) | **`events.json` フォーマット**(物語班が手書きする書式) |
 | [`ScenarioCatalog.md`](./ScenarioCatalog.md) | `events.json` に書く、立ち絵(`portrait`)・アイテム/武器(`itemKey`/`weaponKey`)のキーのカタログ |
 | [`ItemUse.md`](./ItemUse.md) | アイテムを使う調べ方(`useItem`)の書き方と置き方 |

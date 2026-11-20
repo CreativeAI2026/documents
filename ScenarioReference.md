@@ -135,7 +135,7 @@
 | フィールド | 必須 | 内容 |
 | ---------- | ---- | ---- |
 | `id` | ○ | イベント識別子。**物語班が命名する**(イベント内容がわかる snake_case = **小文字の英字・数字・`_` だけ**。例: `cave_encounter`。大文字や記号・日本語は取り込み時にエラー)。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない)。**全イベントで一意**にする |
-| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` / `hasItem` は同じ進行度での分岐に任意で足す(下の「条件タイプ」参照) |
+| `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。`repeat` を省略したイベントは **`progress`(`value` でちょうど一致)を必ず1つ含む**。`repeat` を書いたイベントは `progress` を省略でき、`"min"` / `"max"` で「この進行度以上・以下・範囲」も書ける。`flag` / `hasItem` は分岐に任意で足す(下の「条件タイプ」参照) |
 | `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `setFlag` / `giveItem` / `giveWeapon` / `useItem` / `battle` / `command` / `branch` |
 | `repeat` | | 何回発火するか。省略 = **進行度で1回きり**(下の `nextProgress` で進めて一致しなくなる)。`"once"` = 見終えたら二度と発火しない(進行度は進めなくてよい)。`"always"` = 条件が揃うたびに何度でも発火する(進行度は進めない) |
 | `activation` | | 発火のさせ方。省略 = `"auto"`(範囲に入ったら自動)。`"interact"` = プレイヤーが近づいて [E] を押したときだけ(置き物を調べる形)。`interact` のイベントは `EventInteractor` で置き、`battle` は書けない。**`useItem` を含むイベントは `"interact"` が必須** |
@@ -203,9 +203,8 @@
 | `sound.se` | **必須**(音キー) | 効果音を1回鳴らす。キーと音は ConversationView の **Sounds** に登録する(SoundCue は Audio/SoundCue に置いたものを割り当てる) |
 | `sound.bgm` | **必須**(`キー` または `キー,フェード秒`) | BGM を切り替える(既定 1秒でクロスフェード)。キーの登録先は SE と同じ(Sounds) |
 | `sound.bgm.stop` | 秒数(省略時 1) | BGM をフェードアウトして止める |
-| `camera.*` / 上記以外の `background.*` | 任意 | 会話UIの外へ委譲する枠。**受け手は未実装**なので、書いても今は何も起きない |
 
-> 表に無いコマンド名は取り込み時にエラーで弾く(`camera.` / `background.` で始まるものだけは通す)。
+> この表に無いコマンドは、書いても何も起きない(`camera.` / `background.` で始まるものは取り込みを通るが、動く受け手が無い)。それ以外のコマンド名は取り込み時にエラーになる。
 
 > 例: 暗い状態から始めて、数行しゃべったあとに背景を見せる。
 > ```jsonc
@@ -218,9 +217,21 @@
 
 | type | フィールド | 真になる条件 |
 | ---- | ---------- | ------------ |
-| `progress` | `value`(整数) | 進行度が `value` に**ちょうど一致**(必須・各イベント1つ以上)。ゲーム開始時の進行度は **0** なので、最初のイベントは `value: 0` にする |
+| `progress` | `value`(整数) **または** `min` / `max`(整数) | `value` = 進行度が**ちょうど一致**。`min` = 進行度が `min` **以上**、`max` = `max` **以下**。`min` と `max` を**両方**書くと「`min` 以上 `max` 以下」(両端を含む)の範囲になる。`value` と `min` / `max` は混ぜられない。ゲーム開始時の進行度は **0** なので、最初のイベントは `value: 0` にする。`repeat` を省略したイベントは `value` の progress が**必須**(`min` / `max` だけでは1回きりにならないのでエラー)。`repeat` を書いたイベントでは `progress` は任意 |
 | `flag` | `key` / `value`(文字列) | フラグ `key` の値が `value` に一致(`choice` / `setFlag` で書き込んだ値の分岐に使う) |
 | `hasItem` | `itemKey`(文字列) | その **`itemKey` の「大事なもの」を1つ以上所持**していれば真 |
+
+> **`not`**: どの条件にも `"not": true` を付けると、「満たさないとき」に成立する(例: `{ "type": "hasItem", "itemKey": "card_key", "not": true }` = カードキーを持っていないとき)。省略は `false`。
+
+> **`min` / `max` の使い方**: 「進行度 5 以上なら、いつでも調べられる」「進行度 5〜8 の間だけ調べられる」のような、ストーリーの順番に縛られないイベント用。`repeat` と組み合わせる。
+> ```jsonc
+> { "id": "bench_note", "activation": "interact", "repeat": "always",
+>   "conditions": [ { "type": "progress", "min": 5 } ],               // 5 以上(ずっと)
+>   "steps": [ { "kind": "line", "text": "ベンチの裏に、古いメモが挟まっている。" } ] }
+> { "id": "rain_window", "activation": "interact", "repeat": "always",
+>   "conditions": [ { "type": "progress", "min": 5, "max": 8 } ],     // 5〜8 の間だけ
+>   "steps": [ { "kind": "line", "text": "窓の外は、まだ雨が降っている。" } ] }
+> ```
 
 > **`hasItem` の制約**: `itemKey` は [`ScenarioCatalog.md`](./ScenarioCatalog.md) の **大事なものカタログ**。**「どれか1つ持っていれば」= 特定の1 key を指定**する。複数 `hasItem` を並べると AND(=全部所持)になる。「AのkeyかBのkeyのどちらか」のような OR は無い。
 
