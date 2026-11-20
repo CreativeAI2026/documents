@@ -54,5 +54,5 @@
 4. Unity で `Tools > CreativeAI > アイテムを同期` を実行する
    - 画像に合わせて `ItemCatalog` の中身が作り直される(新しい素材・合成後のアイテムができ、古いものは消える)
 5. key の参照を新しい key に直す
-   - documents リポジトリの [`ScenarioReference.md`](./ScenarioReference.md) の「アイテム・武器キーのカタログ」
+   - documents リポジトリの [`ScenarioCatalog.md`](./ScenarioCatalog.md) の「アイテム・武器キーのカタログ」
    - `game/Assets/_Project/Features/Event/Data/events.json` の `giveItem` の `itemKey`

@@ -1,112 +1,12 @@
-# 物語班リファレンス(立ち絵・キーカタログ・events.json フォーマット)
+# 物語班リファレンス(events.json フォーマット)
 
-物語班が手書きする `events.json` の **フォーマット** と、そこに書くキーの **カタログ**(`portrait` の立ち絵キー、`itemKey`/`weaponKey` のアイテム・武器キー)を定める。
+物語班が手書きする `events.json` の **フォーマット** を定める。`portrait` の立ち絵キーや `itemKey` / `weaponKey` のキーの一覧は [`ScenarioCatalog.md`](./ScenarioCatalog.md) を見る。
 
----
+機能ごとの使い方(手順・例・困ったとき)は、別ページにまとめている。
 
-## 登場人物と立ち絵
-
-各キャラに用意する表情と、`line` ステップの `portrait` に書くキーの一覧。
-キーは `{キャラ}_{表情}` の snake_case。
-
-> 実行時はこのキー**だけ**で立ち絵・立ち位置(左/右)・名前色・タイプ音・表示名が決まる。
-> **表の見出しの名前 = 画面に出る表示名**(`speaker` を書けばそちらが優先される)。
-
-### 主人公 — `hero`
-
-| # | 表情 | portrait キー |
-| - | ---- | ------------- |
-| 1 | 通常顔 | `hero_normal` |
-| 2 | 笑顔(口角が上がる程度) | `hero_smile` |
-| 3 | 困惑 | `hero_confused` |
-| 4 | 驚き | `hero_surprised` |
-| 5 | 疑問 | `hero_question` |
-| 6 | 怒り・覚悟(眉尻が上がる) | `hero_anger` |
-
-### 儚げな少女 — `girl`
-
-| # | 表情 | portrait キー |
-| - | ---- | ------------- |
-| 1 | 通常顔(立ち絵の顔) | `girl_normal` |
-| 2 | 怯え(涙が浮かぶ程度) | `girl_fear` |
-| 3 | 覚悟 | `girl_resolve` |
-| 4 | 笑顔 | `girl_smile` |
-| 5 | 困り笑い | `girl_wry_smile` |
-| 6 | 驚き | `girl_surprised` |
-
-### ロボ — `robot`
-
-| # | 表情 | portrait キー |
-| - | ---- | ------------- |
-| 1 | 通常顔 | `robot_normal` |
-| 2 | 思考 | `robot_thinking` |
-
-### 蓄音機の紳士 — `gramophone`
-
-| # | 表情 | portrait キー |
-| - | ---- | ------------- |
-| 1 | 通常顔 | `gramophone_normal` |
-
----
-
-## アイテム・武器キーのカタログ
-
-`giveItem` の `itemKey` / `giveWeapon` の `weaponKey` に書く **文字列キーの一覧**。立ち絵の `portrait` キーと同じく、物語班はこの表のキーだけを書く。キーは英字 snake_case。
-
-### 武器 — `giveWeapon` の `weaponKey`
-
-| 武器 | key |
-| ---- | --- |
-| 剣 | `sword` |
-| 弓 | `bow` |
-| 鎌 | `scythe` |
-| ハンマー | `hammer` |
-
-### 装備品 — `giveItem` の `itemKey`
-
-| 装備品 | key |
-| ------ | --- |
-| 蛍光灯 | `fluorescent_light` |
-| 磁石 | `magnet` |
-| ノート | `note` |
-| マイク | `microphone` |
-| メガネ | `glasses` |
-| 風船 | `balloon` |
-| 懐中時計 | `clock` |
-| 全身タイツ | `full_body_tights` |
-| 傘 | `umbrella` |
-| 帽子 | `hat` |
-
-### 食材 — `giveItem` の `itemKey`
-
-| 食材 | key |
-| ---- | --- |
-| りんご | `apple` |
-| ぶどう | `grapes` |
-| 桃 | `peach` |
-| バナナ | `banana` |
-| クリーム玄米クッキー | `brown_rice_cream_cookie` |
-| コーヒー | `coffee` |
-| みかんジュース | `orange_juice` |
-| 白米 | `white_rice` |
-| いちごゼリー | `strawberry_jelly` |
-| 味噌汁 | `miso_soup` |
-
-### 大事なもの — `giveItem` の `itemKey`
-
-| 大事なもの | key |
-| ---------- | --- |
-| カードキー | `card_key` |
-| 形見のアクセサリー | `keepsake_accessory` |
-| 汚れたレコード | `dirty_record` |
-| 壊れたロボット | `broken_robot` |
-| 機密書類１ | `classified_document_1` |
-| 機密書類２ | `classified_document_2` |
-| 機密書類３ | `classified_document_3` |
-| 謎の手記１ | `mysterious_note_1` |
-| 謎の手記２ | `mysterious_note_2` |
-| 謎の手記３ | `mysterious_note_3` |
-| 謎の鍵 | `mysterious_key` |
+| ページ | 内容 |
+| ------ | ---- |
+| [`ItemUse.md`](./ItemUse.md) | アイテムを使う調べ方(`useItem`) |
 
 ---
 
@@ -236,8 +136,10 @@
 | ---------- | ---- | ---- |
 | `id` | ○ | イベント識別子。**物語班が命名する**(イベント内容がわかる snake_case = **小文字の英字・数字・`_` だけ**。例: `cave_encounter`。大文字や記号・日本語は取り込み時にエラー)。シーン上のトリガーとこの id を対応させる(座標は JSON に書かない)。**全イベントで一意**にする |
 | `conditions[]` | ○ | 発火条件。すべて満たす(AND)と発火。**`progress` を必ず1つ含む**(進行度が `value` に**一致**したとき真)。`flag` / `hasItem` は同じ進行度での分岐に任意で足す(下の「条件タイプ」参照) |
-| `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `setFlag` / `giveItem` / `giveWeapon` / `battle` / `command` / `branch` |
-| `nextProgress` | ○ | 終了時に進める進行度。**全イベント必須**で、`progress` の `value` **より大きく**する。イベントは進行度が `value` に一致したときだけ発火し、終了で進行度が進んで一致しなくなるので、**どのイベントもちょうど1回だけ発火する** |
+| `steps[]` | ○ | 会話ステップの並び。`line` / `choice` / `setFlag` / `giveItem` / `giveWeapon` / `useItem` / `battle` / `command` / `branch` |
+| `repeat` | | 何回発火するか。省略 = **進行度で1回きり**(下の `nextProgress` で進めて一致しなくなる)。`"once"` = 見終えたら二度と発火しない(進行度は進めなくてよい)。`"always"` = 条件が揃うたびに何度でも発火する(進行度は進めない) |
+| `activation` | | 発火のさせ方。省略 = `"auto"`(範囲に入ったら自動)。`"interact"` = プレイヤーが近づいて [E] を押したときだけ(置き物を調べる形)。`interact` のイベントは `EventInteractor` で置き、`battle` は書けない。**`useItem` を含むイベントは `"interact"` が必須** |
+| `nextProgress` | 下記 | 終了時に進める進行度。`progress` の `value` **より大きく**する。`repeat` を省略した(進行度で1回きりの)イベントでは**必須**で、進行度が進んで `value` と一致しなくなるので二度と発火しない。`"once"` では任意、`"always"` では**書けない** |
 
 ### ステップの種類 (`steps[]` の `kind`)
 
@@ -248,9 +150,10 @@
 | `setFlag` | `flag`(必須) / `value`(必須・空文字可) | `flags[flag]` に `value` を書く。`value` を空文字にするとフラグを空に戻す。画面には何も出ない |
 | `giveItem` | `itemKey`(必須) / `message` | アイテムを1個渡し、**入手演出**(絵 + 文)を出す。1ステップ1個・複数渡すなら並べる |
 | `giveWeapon` | `weaponKey`(必須) / `message` | 武器を渡し、**入手演出**(3Dモデル + 文)を出す |
+| `useItem` | `accept[]`(必須) / `consume`(必須) / `wrong`(必須) / `prompt` / `used` / `onCancel` / `onWrong` / `speaker` / `portrait` | 持ち物から1つ選ばせ、正解なら次へ進む。間違いは `wrong` を出して選び直し。`activation` は `"interact"` 必須・`branch` の中には置けない。書き方は [`ItemUse.md`](./ItemUse.md) |
 | `battle` | なし | 戦闘。敵は JSON に書かず `EventTrigger` に配線する |
 | `command` | `command`(必須) / `arg` | 会話UIの**演出コマンド**を1つ実行する(下表) |
-| `branch` | `flag` + `cases`、または `hasItem` + `then` / `else`（同時指定不可） | 一致する枝だけ実行して共通の続きへ合流。未一致・空の枝はスキップ。**分岐は1段まで**で、枝内は `line` / `giveItem` / `giveWeapon` / `command` のみ。枝内の `choice` / `branch` / `battle` は禁止。`nextProgress` はイベントに1つだけ |
+| `branch` | `flag` + `cases`、または `hasItem` + `then` / `else`（同時指定不可） | 一致する枝だけ実行して共通の続きへ合流。未一致・空の枝はスキップ。**分岐は1段まで**で、枝内は `line` / `giveItem` / `giveWeapon` / `command` のみ。枝内の `choice` / `branch` / `battle` / `useItem` は禁止。`nextProgress` はイベントに1つだけ |
 
 > **`message` は省略可**。省略すると `giveItem` は `{アイテム名}を手に入れた。` を自動で組み立てる。`giveWeapon` は自動で組み立てないので、省略すると文なし(3Dモデルだけ)で表示される。
 > `giveWeapon` の 3Dモデルは `WeaponData` にまだモデル参照が無いため、当面はダミーモデルで表示される。
@@ -319,7 +222,7 @@
 | `flag` | `key` / `value`(文字列) | フラグ `key` の値が `value` に一致(`choice` / `setFlag` で書き込んだ値の分岐に使う) |
 | `hasItem` | `itemKey`(文字列) | その **`itemKey` の「大事なもの」を1つ以上所持**していれば真 |
 
-> **`hasItem` の制約**: `itemKey` は **大事なものカタログ**。**「どれか1つ持っていれば」= 特定の1 key を指定**する。複数 `hasItem` を並べると AND(=全部所持)になる。「AのkeyかBのkeyのどちらか」のような OR は無い。
+> **`hasItem` の制約**: `itemKey` は [`ScenarioCatalog.md`](./ScenarioCatalog.md) の **大事なものカタログ**。**「どれか1つ持っていれば」= 特定の1 key を指定**する。複数 `hasItem` を並べると AND(=全部所持)になる。「AのkeyかBのkeyのどちらか」のような OR は無い。
 
 > **`flag` 条件は、フラグが変わった時点でも発火を判定する**。トリガーの中に居る間にフラグが変わると、その場で条件を見直す。そのため、フラグが先に立っていると、他の条件(`progress` など)が揃った瞬間にイベントが出てしまう。先に立つ可能性があるなら、前のイベントの冒頭で `setFlag` を使って空に戻す。
 > 例(合成チュートリアル): イベント5 の冒頭で `crafted` を空に戻して素材を渡す。次のイベントは `progress` = 5 と `flag` の `crafted` = `"1"` を条件にする。
