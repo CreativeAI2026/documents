@@ -6,7 +6,7 @@
 - 間違ったアイテムを選ぶと、「これは違うようだ」のようなセリフが出て、選び直せる
 - 選んだ物が正解のときだけ、先へ進む
 
-`events.json` の書式の全体は [`ScenarioReference.md`](./ScenarioReference.md)、置き方の基本は [`EventPlacement.md`](./EventPlacement.md) を見る。このページは `useItem` だけを扱う。
+`events.json` の書式の全体は [`ScenarioReference.md`](./ScenarioReference.md)、やりたいこと別の書き方は [`EventRecipes.md`](./EventRecipes.md)、置き方の基本は [`EventPlacement.md`](./EventPlacement.md) を見る。このページは `useItem` だけを扱う。
 
 ---
 
@@ -21,7 +21,7 @@
       "id": "door_jelly",
       "activation": "interact",          // 必須。プレイヤーが [E] を押して調べる形にする
       "repeat": "once",                  // 正解したら1回きり。やめた・間違えたままなら、また調べられる
-      "conditions": [],
+      "conditions": [],                  // repeat を書いたので progress は不要。いつから調べられるかを絞るなら下の「書き方のコツ」を見る
       "steps": [
         { "kind": "line", "text": "ドアには小さな差し込み口がある。" },
         {
@@ -107,7 +107,13 @@
 - **使って減らしてよいか**を決める。ドアの鍵のように使い切るなら `consume: true`、機械の起動のように何度でも使えるなら `false`
 - **「どれでもよい」場合**は、`accept` に候補を並べる(例: りんごかバナナ)
 - **相手に渡す場面**では、`speaker` と `portrait` を付け、`wrong` / `used` / `onCancel` をその人の言葉にする
-- 何度でも調べられる場所なら `repeat: "always"`(進行度も進まない)。1回きりなら `"once"`、進行度を進めたいなら `nextProgress` を書く(書式は [`ScenarioReference.md`](./ScenarioReference.md))
+- 何度でも調べられる場所なら `repeat: "always"`(進行度も進まない)。1回きりなら `"once"`、進行度を進めたいなら `nextProgress` を書く。組み合わせの一覧は [`EventRecipes.md`](./EventRecipes.md) を見る
+- **調べられる時期を絞る**なら、`conditions` に進行度の `min` / `max` を書く。例: 進行度 5 以上で、ずっと調べられる
+  ```jsonc
+  "activation": "interact",
+  "repeat": "always",
+  "conditions": [ { "type": "progress", "min": 5 } ]
+  ```
 
 ### 例: 渡す相手が間違いで話を切り上げる
 
